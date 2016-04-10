@@ -3,26 +3,32 @@
 #include "House.h"
 #include "AbstractAlgorithm.h"
 #include "SimpleSensor.h"
+#include <vector>
+
 
 
 
 class Simulator {
-	int currentYPos;
-	int currentXPos;
-	char** matrix;
-	int batteryUsed;
+	int housesAmount;
+	int algorithmsAmount;
+	int* currentYPos;
+	int* currentXPos;
+	std::vector<char**> matrix;
+	int* batteryUsed;
 	int batteryCapacity;
 	int batteryConsumptionRate;
 	int batteryRechargeRate;
-	int dustAmountInHome;
+	int* dustAmountInHome;
 	int winnerSteps;
-	int stepsMade;
+	int* stepsMade;
 	int maxSteps;
 	int maxStepsAfterWinner;
 	int simulationSteps;
-	House* house;
-	AbstractAlgorithm* algorithm;
+	std::vector<House*> houses;
+	std::vector<AbstractAlgorithm*> algorithms;
 	const map<string, int> config;
+	int** scores;
+	int currentHouse;
 public:
   /*
    constructor 
