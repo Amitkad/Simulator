@@ -24,6 +24,7 @@ class Simulator {
 	int maxSteps;
 	int maxStepsAfterWinner;
 	int simulationSteps;
+	House* house; 
 	std::vector<House*> houses;
 	std::vector<AbstractAlgorithm*> algorithms;
 	const map<string, int> config;
@@ -63,7 +64,7 @@ public:
 	 @return
 	 tries to move up . return 1 on success 0 on error
 	 */
-	int moveUp();
+	int moveUp(int i);
 	
 	
 	/*
@@ -71,21 +72,21 @@ public:
 	 @return
 	 tries to move down . return 1 on success 0 on error
 	 */	
-	int moveDown();
+	int moveDown(int i);
 
 	/*
 	 try to move left
 	 @return
 	 tries to move left . return 1 on success 0 on error
 	 */
-	int moveLeft();
+	int moveLeft(int i);
 
 	/*
 	 try to move right
 	 @return
 	 tries to move right . return 1 on success 0 on error
 	 */
-	int moveRight();
+	int moveRight(int i);
 
 };
 

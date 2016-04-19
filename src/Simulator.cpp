@@ -55,12 +55,15 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,
 	algorithms = _algorithms;
 	
 	//todo fix matrixes for each algo .
-	
-	matrix = (char**) malloc(sizeof(char*) * _house->getRowCount());
-	for (int i = 0; i < _house->getRowCount(); ++i) {
-		matrix[i] = (char*) malloc(sizeof(char) * _house->getColCount());
-		memcpy(matrix[i], _house->getMatrix()[i], _house->getColCount());
+	matrixes = (char***) malloc(sizeof(char**)*_algorithmsAmount);
+	for(int j=0 ; j < _algorithmsAmount ; j++){
+	  matrixes[j] = (char**) malloc(sizeof(char*) * _house->getRowCount());
+	  for (int i = 0; i < _house->getRowCount(); ++i) {
+	    matrixes[j][i] = (char*) malloc(sizeof(char) * _house->getColCount());
+	    memcpy(matrixes[j][i], _house->getMatrix()[i], _house->getColCount());
+	  }
 	}
+
 
 }
 
@@ -70,62 +73,97 @@ Simulator::~Simulator(){
 }
 
 void Simulator::run() {
-	bool algoSentToAWall = false;
-	bool winnerFound = false;
-	bool wonAlready = false;
-	int stepsMadeAfterWinner = 0;
-	AbstractSensor* sensor = new SimpleSensor(matrix, &currentXPos, &currentYPos);
-	algorithm->setSensor(*sensor);
-	algorithm->setConfiguration(this->config);
-	if (dustAmountInHome == 0) {
-		wonAlready = true;
+
+  int stepsMadeAfterWinner = (int*)malloc(sizeof(int)*this.algorithmsAmount);
+  bool algoSentToAWall = (bool*)malloc(sizeof(int)*this.algorithmsAmount);
+  bool wonAlready = (bool*)malloc(sizeof(int)*this.algorithmsAmount);
+  AbstractSensor* sensors = (AbstractSensor*)malloc(sizeof(AbstractSensor)*this.algorithmsAmount); 
+  int houseIndex = 0;
+	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
+	  winnerFound = false;
+	  int dustAmount = houseIt->initDustAmount();//todo get amount.
+	  int xDoc = houseIt->getDockStationX();
+	  int yDoc = houseIt->getDockStationY();
+	  int stepsMadeAfterWinnerFound;
+	  house = houseIt;
+	  
+	  for(int i = 0 ; i < this.algorithmsAmount ; i++){
+	    this.stepsMade[i] = 0;
+	    this.batteryUsed[i] = 0;
+	    this.dustAmountInHome[i] = dustAmount;
+	    this.currentXPos[i] = xDoc;
+	    this.currentYPos[i] = yDoc;
+	    stepsMadeAfterWinner[i] = 0;
+	    wonAlready[i]=false;
+	    algoSentToAWall[i] = false;
+	    
+	    matrixes[i] = (char**) malloc(sizeof(char*) * houseIt->getRowCount());
+	    for (int j = 0; j < houseIt->getRowCount(); ++j) {
+	      matrixes[i][j] = (char*) malloc(sizeof(char) * houseIt->getColCount());
+	      memcpy(matrixes[j][i], houseIt->getMatrix()[i], houseIt->getColCount());
+	    }
+	    
+	    sensors[i] = new SimpleSensor(matrixes[i], &(currentXPos[i]), &(currentYPos[i]));
+
+	    
+	    if (dustAmount == 0) {
+		wonAlready[i] = true;
 		winnerFound = true;
-	}
-	while (this->stepsMade <= this->maxSteps
-			&& // there are steps left to do
-			this->batteryUsed <= this->batteryCapacity
-			&& // battery is not depleted
-			(!winnerFound || stepsMadeAfterWinner <= this->maxStepsAfterWinner)
-			&& // there was no winner yet or the amount of steps made after winner were small
-			!wonAlready && !algoSentToAWall) { // algo failed us and sent the robot to collide with a wall
-//		cout<<simulationSteps<<": ";
-		simulationSteps++; //increment simulationSteps;
-		if (matrix[currentYPos][currentXPos] != 'D'
-				&& matrix[currentYPos][currentXPos] != ' ') { // if we are on a dusty block we clean it
-			matrix[currentYPos][currentXPos]--;
-			dustAmountInHome--;
-		}
-		//if in dockStation recharge battery
-		if (matrix[currentYPos][currentXPos] == 'D') {
-			batteryUsed =
-					batteryUsed - batteryRechargeRate > 0 ?
-							batteryUsed - batteryRechargeRate : 0;
+	    }
+	  }
+	  int i=0;
+	
+	  for(vector<AbstractAlgorithm*>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
+	    algoIt->setSensor(*(sensors[i]));
+	    algoIt->setConfiguration(this->config);
+	    i++;	  
+	  }
+	  
+	  for(int stepNumber = 0 ; stepNumber < maxSteps && stepsMadeAfterWinnerFound < MaxStepsAfterWinner ; stepNumber++){
+	    
+		int i = 0;
+	    	for(vector<AbstractAlgorithm*>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
+		  
+		  if(algoSentToAWall[i] || wonAlready[i] || this->batteryUsed[i] > this->batteryCapacity || this->stepsMade[i] > this->maxSteps || (winnerFound & stepsMadeAfterWinner[i] > this.maxStepsAfterWinner)){
+		  
+		  }else{
+		    
+		    	if (matrixes[i][currentYPos[i]][currentXPos[i]] != 'D' && matrixes[i][currentYPos[i]][currentXPos[i]] != ' ') { // if we are on a dusty block we clean it
+			  matrixes[i][currentYPos[i]][currentXPos[i]]--;
+			  dustAmountInHome[i]--;
+			}
+			
+					//if in dockStation recharge battery
+		if (matrixes[i][currentYPos[i]][currentXPos[i]] == 'D') {
+			batteryUsed[i] =
+					batteryUsed[i] - batteryRechargeRate > 0 ?
+							batteryUsed[i] - batteryRechargeRate : 0;
 		} else { //else consume
-			batteryUsed += batteryConsumptionRate;
+			batteryUsed[i] += batteryConsumptionRate;
 		}
 		if (winnerFound) { //if there is already a winner we count the steps made after winner also.
-			stepsMadeAfterWinner++;
+			stepsMadeAfterWinner[i]++;
 		}
-		if (wonAlready) {
+		if (wonAlready[i]) {
 			winnerFound = true;
 		}
-
+		
 		Direction algoRecomendation = algorithm->step();
 //		cout<<endl;
 		int stepResult = 1;
 
 		switch (algoRecomendation) { //simulator check for algorithm return value
 		case Direction::East:
-			stepResult = this->moveRight();
+			stepResult = this->moveRight(i);
 			break;
 		case Direction::West:
-			stepResult = this->moveLeft();
+			stepResult = this->moveLeft(i);
 			break;
 		case Direction::North:
-			stepResult = this->moveUp();
+			stepResult = this->moveUp(i);
 			break;
 		case Direction::South:
-			stepResult = this->moveDown();
+			stepResult = this->moveDown(i);
 			break;
 		case Direction::Stay:
 			break;
@@ -134,18 +172,42 @@ void Simulator::run() {
 		this->stepsMade++;
 		if (stepResult == 0) {
 //			cout<<"wall" <<endl;
-			algoSentToAWall = true;
+			algoSentToAWall[i] = true;
 		}
-		if (dustAmountInHome == 0 && matrix[currentYPos][currentXPos] == 'D') {
-					wonAlready = true;
+		if (dustAmountInHome[i] == 0 && matrixes[i][currentYPos[i]][currentXPos[i]] == 'D') {
+		  
+		  if(!winnerFound) winnerSteps = stepNumber;
+					wonAlready[i] = true;
 				}
-
+		  int lowest = maxSteps;
+		  lowest = lowest < maxSteps - stepNumber ? lowest : maxSteps - stepNumber ; 
+		  lowest = lowest < MaxStepsAfterWinner - stepsMadeAfterWinner[i] ? lowest : MaxStepsAfterWinner - stepsMadeAfterWinner[i] ; 
+		  lowest = lowest < this->batteryCapacity - batteryUsed[i] ? lowest : this->batteryCapacity - batteryUsed[i] ; 
+		  *algoIt.aboutToFinish(lowest);
+			this.stepsMade[i]++;
+		  
+		  }
+		  i++;
+		}
+		simulationSteps++;
+		
+	    
+	  }
+	  
+	  //todo run on each algo and calculate its score . then put the score in the scores table .
+	  int i=0;
+	  for(vector<AbstractAlgorithm*>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
+	    scores[houseIndex][i] = calcScore(wonAlready[i]);
+	    i++;
+	  }
+	  houseIndex++;
+	  
 	}
+  
+  
 	
 	//delete sensor;
 	this->winnerSteps = this->stepsMade; // only for ex1 the single algorithm is also the winner
-	int score = calcScore(wonAlready);
-	cout << score <<endl;
 	//freeing matrix
 	for (int i = 0; i < house->getRowCount(); ++i)
 		free(matrix[i]);
@@ -164,36 +226,36 @@ int Simulator::calcScore(bool wonalready) {
 }
 
 //try to move up .. on success go up and return 1 otherwise do nothing and return 0
-int Simulator::moveUp() {
-	if (currentYPos > 0 && matrix[currentYPos - 1][currentXPos] != 'W') {
-		(currentYPos)--;
+int Simulator::moveUp(int i ) {
+	if (currentYPos[i] > 0 && matrixes[i][currentYPos[i] - 1][currentXPos[i]] != 'W') {
+		(currentYPos[i])--;
 		return 1;
 	}
 	return 0;
 }
 //try to move down .. on success go down and return 1 otherwise do nothing and return 0
-int Simulator::moveDown() {
-	if (currentYPos < house->getRowCount()
-			&& house->getMatrix()[currentYPos + 1][currentXPos] != 'W') {
-		(currentYPos)++;
+int Simulator::moveDown(int i) {
+	if (currentYPos[i] < house->getRowCount()
+			&& house->getMatrix()[currentYPos[i] + 1][currentXPos[i]] != 'W') {
+		(currentYPos[i])++;
 		return 1;
 	}
 	return 0;
 }
 //try to move left .. on success go left and return 1 otherwise do nothing and return 0
-int Simulator::moveLeft() {
-	if (currentXPos > 0
-			&& house->getMatrix()[currentYPos][currentXPos - 1] != 'W') {
-		(currentXPos)--;
+int Simulator::moveLeft(int i) {
+	if (currentXPos[i] > 0
+			&& house->getMatrix()[currentYPos[i]][currentXPos[i] - 1] != 'W') {
+		(currentXPos[i])--;
 		return 1;
 	}
 	return 0;
 }
 //try to move right .. on success go right and return 1 otherwise do nothing and return 0
-int Simulator::moveRight() {
-	if (currentXPos < house->getColCount()
-			&& house->getMatrix()[currentYPos][currentXPos + 1] != 'W') {
-		(currentXPos)++;
+int Simulator::moveRight(int i) {
+	if (currentXPos[i] < house->getColCount()
+			&& house->getMatrix()[currentYPos[i]][currentXPos[i] + 1] != 'W') {
+		(currentXPos[i])++;
 		return 1;
 	}
 	return 0;
