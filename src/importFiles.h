@@ -96,8 +96,7 @@ public:
 	const vector<map<AbstractAlgorithm*, string>>& getAlgorithms();
 	const vector<map<House, string>>& getHouses();
 	const map<string, int>& getParameters();
-	bool getErr();
-	void setErr(bool err);
+
 };
 
 #endif /* INPUTPARSER_H_ */

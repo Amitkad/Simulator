@@ -20,13 +20,13 @@ bool importFiles::checkArgValidity(int argc, char* argv[]) {
 }
 
 void importFiles::fillInputFromFiles(int argc, char* argv[]) {
-	config = new importFiles::importConfig(configPath, *this);
+	config = new importFiles::importConfig(configPath,*this);
 	if (err)
 		return;
-	algorithms = new importFiles::importAlgs(algorithmPath, *this);
+	algorithms = new importFiles::importAlgs(algorithmPath,*this);
 	if (err)
 		return;
-	houses = new importFiles::importHouses(housePath, *this);
+	houses = new importFiles::importHouses(housePath,*this);
 	if (err)
 		return;
 
@@ -35,18 +35,15 @@ void importFiles::fillInputFromFiles(int argc, char* argv[]) {
 //class member getters
 const vector<map<AbstractAlgorithm*, string>>& importFiles::getAlgorithms() {
 	return algorithms->getAlgorithms();
+
 }
 const vector<map<House, string>>& importFiles::getHouses() {
 	return houses->getHouses();
+
 }
 const map<string, int>& importFiles::getParameters() {
 	return config->getParameters();
-}
-bool importFiles::getErr() {
-	return this->err;
-}
-void importFiles::setErr(bool err) {
-	this->err = err;
+
 }
 
 //-------------------------------------------------------- Nested: importConfig --------------------------------------------------------//
@@ -81,10 +78,8 @@ void importFiles::importConfig::loadFromFile(const string& iniPath) {
 	this->parameters.clear();
 	ifstream fin(iniPath.c_str());
 	if (!fin.good()) { // check iniPath existence
-		parent.setErr(true);
-		cout
-				<< "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n"
-				<< endl;
+		parent.err = false;
+		cout<< "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n"<< endl;
 		return;
 	}
 	string line;
@@ -94,22 +89,14 @@ void importFiles::importConfig::loadFromFile(const string& iniPath) {
 	}
 }
 
-importFiles::importConfig::importConfig(const string& iniPath,
-		importFiles& _parent) :
-		parent(_parent) {
+importFiles::importConfig::importConfig(const string& iniPath,importFiles& _parent):parent(_parent) {
 	this->loadFromFile(iniPath);
-	if (parent.getErr())
+	if (!parent.err)
 		return;
 	checkParameters();
 }
-
-void importFiles::importConfig::checkParameters() {
-	if ((parameters.find("MaxStepsAfterWinner") == parameters.end())
-			|| (parameters.find("BatteryCapacity") == parameters.end())
-			|| (parameters.find("BatteryConsumptionRate") == parameters.end())
-			|| (parameters.find("BatteryRechargeRate") == parameters.end())) {
-		parent.setErr(true);
-	}
+void importFiles::importConfig::checkParameters(){
+	//TODO write the function that checks all parameters exists(if not update error and return)
 }
 
 const map<string, int>& importFiles::importConfig::getParameters() {
@@ -119,23 +106,77 @@ const map<string, int>& importFiles::importConfig::getParameters() {
 //-------------------------------------------------------- Nested: import algorithms --------------------------------------------------------//
 
 //TODO
-importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent) :
-		parent(_parent) {
-}
+importFiles::importAlgs::importAlgs(const string& iniPath,importFiles& _parent):parent(_parent) {}
 
-const vector<map<AbstractAlgorithm*, string>>& importFiles::importAlgs::getAlgorithms() {
-}
+const vector<map<AbstractAlgorithm*, string>>& importFiles::importAlgs::getAlgorithms() {}
 
 //-------------------------------------------------------- Nested: import houses --------------------------------------------------------//
 
 //TODO
 
-importFiles::importHouses::importHouses(const string& iniPath,
-		importFiles& _parent) :
-		parent(_parent) {
-}
+importFiles::importHouses::importHouses(const string& iniPath,importFiles& _parent):parent(_parent) {}
 
-const vector<map<House, string>>& importFiles::importHouses::getHouses() {
-}
+const vector<map<House, string>>& importFiles::importHouses::getHouses() {}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//int errCode = 0;
+//const char* algorithmPath, housePath, configPath;
+//vector<map<AbstractAlgorithm*, char*>> algorithms; //list of algorithms: <algorithm,Error>
+//vector<map<House, char*>> houses;//list of houses: <house,Error> (if no errors then error="")
+//map<string, int> config;//cnfig.ini <parameter,value>
+
+//
+//
+//	//config parser nested privet class
+//		class configParser {
+//			map<string, int> parameters; //holds the parameters and its values
+//			/*splits, trims and put result in "parameters"
+//			 * @param
+//			 * line - a text input
+//			 */
+//			void processLine(const string& line);
+//			/*load the file iniPath or default config.ini if iniPath doesn't exists
+//			 * @param
+//			 * iniPath - path for config file
+//			 */
+//			void loadFromFile(const string& iniPath);
+//		public:
+//			//c'tor
+//			configParser(const string& iniPath);
+//			//"parametrs" getter function
+//			const map<string, int>& getParameters();
+//		};
 
