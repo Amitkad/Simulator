@@ -98,7 +98,11 @@ importFiles::importConfig::importConfig(const string& iniPath,importFiles& _pare
 	checkParameters(); //TODO write the function that checks all parameters exists(if not update error and return)
 }
 void importFiles::importConfig::checkParameters(){
+<<<<<<< HEAD
 
+=======
+	//TODO write the function that checks all parameters exists(if not update error and return)
+>>>>>>> parent of bde7637... config check finish
 }
 
 const map<string, int>& importFiles::importConfig::getParameters() {
