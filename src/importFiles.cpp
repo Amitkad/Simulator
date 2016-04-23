@@ -3,7 +3,7 @@
 using namespace std;
 
 //TODO - destructors
-// --------import files --------//
+// -------------------------------------------------- Base Class: import files --------------------------------------------------------//
 
 //c'tor
 importFiles::importFiles(int argc, char* argv[]) :
@@ -14,7 +14,7 @@ importFiles::importFiles(int argc, char* argv[]) :
 	this->fillInputFromFiles(argc, argv);
 }
 
-//check flags validity and number of parameters, updates paths and error accordingly
+//check flags validity and number of parameters, updates to new paths and put error accordingly
 bool importFiles::checkArgValidity(int argc, char* argv[]) {
 	return true; //TODO
 }
@@ -46,7 +46,7 @@ const map<string, int>& importFiles::getParameters() {
 
 }
 
-//--------------importConfig----------------//
+//-------------------------------------------------------- Nested: importConfig --------------------------------------------------------//
 
 static vector<string> split(const string &s, char delim) {
 	vector<string> elems;
@@ -76,7 +76,6 @@ void importFiles::importConfig::processLine(const string& line) {
 
 void importFiles::importConfig::loadFromFile(const string& iniPath) {
 	this->parameters.clear();
-
 	ifstream fin(iniPath.c_str());
 	if (!fin.good()) { // check iniPath existence
 		parent.err = false;
@@ -84,7 +83,6 @@ void importFiles::importConfig::loadFromFile(const string& iniPath) {
 		return;
 	}
 	string line;
-
 	while (getline(fin, line)) //fill "parameters" with the the parameters and values
 	{
 		this->processLine(line);
@@ -95,24 +93,24 @@ importFiles::importConfig::importConfig(const string& iniPath,importFiles& _pare
 	this->loadFromFile(iniPath);
 	if (!parent.err)
 		return;
-	checkParameters(); //TODO write the function that checks all parameters exists(if not update error and return)
+	checkParameters();
 }
 void importFiles::importConfig::checkParameters(){
-
+	//TODO write the function that checks all parameters exists(if not update error and return)
 }
 
 const map<string, int>& importFiles::importConfig::getParameters() {
 	return parameters;
 }
 
-//--------------import algorithms -------------//
+//-------------------------------------------------------- Nested: import algorithms --------------------------------------------------------//
 
 //TODO
 importFiles::importAlgs::importAlgs(const string& iniPath,importFiles& _parent):parent(_parent) {}
 
 const vector<map<AbstractAlgorithm*, string>>& importFiles::importAlgs::getAlgorithms() {}
 
-//--------------import houses--------------------//
+//-------------------------------------------------------- Nested: import houses --------------------------------------------------------//
 
 //TODO
 
