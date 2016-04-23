@@ -3,25 +3,59 @@
 #include <cstring>
 
 #include "Simulator.h"
+#include <vector>
 
+using namespace std;
 //CleanAlgorithm algorithm;
-Simulator::Simulator(House* _house, const map<string, int> _config,
-		AbstractAlgorithm* _algorithm) :
+Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,
+		vector<AbstractAlgorithm*> _algorithms , int _housesAmount , int _algorithmsAmount) :
 		config(_config) {
+	algorithmsAmount = _algorithmsAmount;
+	housesAmount = _housesAmount;
 	maxSteps = _config.find("MaxSteps")->second;
 	maxStepsAfterWinner = _config.find("MaxStepsAfterWinner")->second;
 	batteryCapacity = _config.find("BatteryCapacity")->second;
 	batteryConsumptionRate = _config.find("BatteryConsumptionRate")->second;
 	batteryRechargeRate = _config.find("BatteryRechargeRate")->second;
-	house = _house;
-	stepsMade = 0;
-	winnerSteps = 0;
 	simulationSteps = 0;
-	batteryUsed = 0;
-	currentYPos = (_house->getDockStationY());
-	currentXPos = (_house->getDockStationX());
-	algorithm = _algorithm;
-	dustAmountInHome = this->house->initDustAmount();
+	winnerSteps = 0;
+	currentHouse = 0;
+	
+	scores = (int**) malloc(sizeof(int*) * _algorithmsAmount);
+	for(int i = 0 ; i < _algorithmsAmount ; i++){
+	  scores[i] = (int*) malloc(sizeof(int) * _housesAmount);
+	  for(int j = 0 ; j < _housesAmount ; j++){
+	    scores[i][j] = 0;
+	  }
+	}
+	
+	houses = _houses;
+	stepsMade = (int*) malloc(sizeof(int) * _algorithmsAmount);
+	batteryUsed = (int*) malloc(sizeof(int) * _algorithmsAmount);
+	dustAmountInHome = (int*) malloc(sizeof(int) * _algorithmsAmount);
+	currentYPos = (int*) malloc(sizeof(int) * _algorithmsAmount);
+	currentXPos = (int*) malloc(sizeof(int) * _algorithmsAmount);
+	
+	
+	int amountOfDustInFirstHouse = (this->houses.begin())->initDustAmount(); // should be first house 
+	int dockX = (_houses.begin())->getDockStationX();
+	int dockY = (_houses.begin())->getDockStationY();
+	
+	
+	for(int i = 0 ; i < _algorithmsAmount ; i++){
+	  stepsMade[i] = 0;
+	  batteryUsed[i] = 0;
+	  dustAmountInHome[i] = amountOfDustInFirstHouse;
+	  currentYPos[i] = dockY;
+	  currentXPos[i] = dockX;
+	}
+	
+	
+
+	algorithms = _algorithms;
+	
+	//todo fix matrixes for each algo .
+	
 	matrix = (char**) malloc(sizeof(char*) * _house->getRowCount());
 	for (int i = 0; i < _house->getRowCount(); ++i) {
 		matrix[i] = (char*) malloc(sizeof(char) * _house->getColCount());
