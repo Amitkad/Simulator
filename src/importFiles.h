@@ -97,6 +97,7 @@ public:
 	const vector<map<House, string>>& getHouses();
 	const map<string, int>& getParameters();
 	bool getErr();
+	//err setter
 	void setErr(bool err);
 };
 

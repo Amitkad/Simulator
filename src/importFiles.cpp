@@ -42,9 +42,11 @@ const vector<map<House, string>>& importFiles::getHouses() {
 const map<string, int>& importFiles::getParameters() {
 	return config->getParameters();
 }
+//err getter
 bool importFiles::getErr() {
 	return this->err;
 }
+//err setter
 void importFiles::setErr(bool err) {
 	this->err = err;
 }
