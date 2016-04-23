@@ -15,7 +15,7 @@
 
 using namespace std;
 
-//TODO put comments
+//code from class with a bit of edits.
 class importFiles {
 
 
