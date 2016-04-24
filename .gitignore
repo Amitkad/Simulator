@@ -52,3 +52,6 @@ Temporary Items
 Debug/Simulator.exe
 .settings/org.eclipse.cdt.managedbuilder.core.prefs
 Debug/config.ini
+*.cproject
+.cproject
+*.prefs

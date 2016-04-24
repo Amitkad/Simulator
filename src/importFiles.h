@@ -1,5 +1,7 @@
 #ifndef INPUTPARSER_H_
 #define INPUTPARSER_H_
+#include <stdio.h>
+#include <stdlib.h>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -10,6 +12,9 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <algorithm>
+#include <errno.h>
 #include "AbstractAlgorithm.h"
 #include "house.h"
 
@@ -22,7 +27,7 @@ class importFiles {
 	// ---------- config parser nested private class -------//
 	class importConfig {
 		importFiles& parent;
-		map<string, int> parameters; //cnfig.ini <parameter,value>
+		map<string, int> parameters; //config.ini <parameter,value>
 		/*splits, trims and put result in "parameters"
 		 * @param
 		 * line - a text input
@@ -45,7 +50,7 @@ class importFiles {
 	// ---------- algorithms parser nested private class -------//
 	class importAlgs {
 		importFiles& parent;
-		vector<map<AbstractAlgorithm*, string>> algorithms; //list of algorithms: <algorithm,Error>
+		map<AbstractAlgorithm*, string> algorithms; //list of algorithms: <algorithm,Error>(if no errors then error="")
 
 		/*load the file iniPath or default config.ini if iniPath doesn't exists
 		 * @param
@@ -56,13 +61,19 @@ class importFiles {
 		//c'tor
 		importAlgs(const string& iniPath,importFiles& _parent);
 		//"algorithms" getter function
-		const vector<map<AbstractAlgorithm*, string>>& getAlgorithms();
+		const map<AbstractAlgorithm*, string>& getAlgorithms();
 	};
 
 	// ---------- houses parser nested private class -------//
 	class importHouses {
 		importFiles& parent;
-		vector<map<House, string>> houses; //list of houses: <house,Error> (if no errors then error="")
+		map<House, string> houses; //list of houses: <house,Error> (if no errors then error="")
+
+
+		void insertHousesFromFile(vector<string> dirList);
+
+		void checkHousesValidity();
+		static bool is_number(const std::string& s);
 
 		/*load the file iniPath or default config.ini if iniPath doesn't exists
 		 * @param
@@ -73,8 +84,44 @@ class importFiles {
 		//c'tor
 		importHouses(const string& iniPath,importFiles& _parent);
 		//"houses" getter function
-		const vector<map<House, string>>& getHouses();
+		const map<House, string>& getHouses();
 	};
+	// ---------- fileLister in use with algorithms and houses -------//
+
+	class FilesLister
+	{
+	public:
+	  FilesLister(const string& basePath);
+	  virtual void refresh();
+	  vector<string> getFilesList();
+	  bool getErr();
+	  //err setter
+	  void setErr(bool err);
+
+	protected:
+	  vector<string> filesList_;
+	  string basePath_;
+	  bool err=false; //fileLister err flag
+
+
+	private:
+	  static string concatenateAbsolutePath(const string& dirPath, const string& fileName);
+	};
+	//inherited class of fileLister for specidif suffix
+	class FilesListerWithSuffix : public FilesLister
+	{
+	public:
+	  FilesListerWithSuffix(const string& basePath, const string& suffix);
+	  virtual void refresh();
+
+	protected:
+	  void filterFiles();
+	  static inline bool endsWith(std::string value, std::string ending);
+	  string suffix_;
+	};
+
+
+	//end of nested classes//
 
 	bool err = false;//true iff there was an error
 	const string algorithmPath, housePath, configPath;
@@ -93,8 +140,8 @@ public:
 	importFiles(int argc, char* argv[]);
 
 	//class member getters
-	const vector<map<AbstractAlgorithm*, string>>& getAlgorithms();
-	const vector<map<House, string>>& getHouses();
+	const map<AbstractAlgorithm*, string>& getAlgorithms();
+	const map<House, string>& getHouses();
 	const map<string, int>& getParameters();
 	bool getErr();
 	//err setter

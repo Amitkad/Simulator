@@ -3,35 +3,47 @@
 #include <stdlib.h>
 #include "House.h"
 
-House::House(char** matrix, int colCount, int rowCount, string& _name, string& _description) {
+House::House(char** matrix, int colCount, int rowCount, string _name) {
 	this->matrix = matrix;
 	this->colCount = colCount;
 	this->rowCount = rowCount;
 	this->name = _name;
-	this->description=_description;
-	for (int i = 0; i < rowCount; i++) {
-		for (int j = 0; j < colCount; j++) {
-			if (matrix[i][j] == 'D') {
-				this->dockingY = i;
-				this->dockingX = j;
-			}
-		}
-	}
+	this->setWalls();
+	this->setDock();
 }
-House::~House(){
+House::~House() {
 	for (int i = 0; i < rowCount; i++) {
 		free(matrix[i]);
 	}
-	free(matrix);
+	if (matrix != NULL)
+		free(matrix);
+}
+void House::setWalls() {
+	for (int i = 0; i < rowCount; i++) {
+		for (int j = 0; j < colCount; j++) {
+			if (i == 0 || j == 0 || i == rowCount - 1 || j == colCount - 1)
+				matrix[i][j] = 'w';
+		}
+	}
 }
 
-const string& House::getName(){
+void House::setDock() {
+	int cnt=0;
+	for (int i = 0; i < rowCount; i++) {
+			for (int j = 0; j < colCount; j++) {
+				if (matrix[i][j] == 'D') {
+					cnt++;
+					this->dockingY = i;
+					this->dockingX = j;
+				}
+			}
+		}
+	errCode=cnt;
+}
+
+const string& House::getName() {
 	return this->name;
 }
-const string& House::getDescription() {
-	return this->description;
-}
-
 
 int House::getDockStationX() {
 	return this->dockingX;
@@ -47,6 +59,9 @@ int House::getRowCount() {
 }
 char** House::getMatrix() const {
 	return this->matrix;
+}
+int House::getErr(){
+	return errCode;
 }
 int House::initDustAmount() {
 	int sum = 0;
