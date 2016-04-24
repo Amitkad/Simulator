@@ -48,7 +48,7 @@ const map<string, int>& importFiles::getParameters() {
 bool importFiles::getErr() {
 	return this->err;
 }
-//err setter
+//err  setter
 void importFiles::setErr(bool err) {
 	this->err = err;
 }
