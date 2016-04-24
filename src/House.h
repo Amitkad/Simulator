@@ -34,7 +34,7 @@ class House {
        */
       ~House();
       /*getters*/
-      const string& getName();
+      const string& getName()const;
       int getDockStationX();
       int getDockStationY();
       int getColCount();

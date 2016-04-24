@@ -41,7 +41,7 @@ void House::setDock() {
 	errCode=cnt;
 }
 
-const string& House::getName() {
+const string& House::getName() const {
 	return this->name;
 }
 

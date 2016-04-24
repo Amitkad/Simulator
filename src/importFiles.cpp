@@ -137,7 +137,7 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 	insertHousesFromFile(housesLister.getFilesList());
 	if (parent.getErr())
 		return;
-	checkHousesValidity();
+	checkHousesValidity();//TODO
 
 }
 
@@ -147,7 +147,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	string err, line;
 	int maxSteps, rows, cols;
 	char** matrix;
-	int errcnt = 0;
+	size_t errcnt = 0;
 	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) {
 		ifstream fin((*itr).c_str());
 		if (!fin.good()) {  // check open success
@@ -196,19 +196,24 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 					matrix[i][k] = SPACE;
 		}
 		House house = new House(matrix, cols, rows, (*itr).substr((*itr).find_last_of("/\\") + 1));
-		if (house.getErr() == 0) {
+		if (house.getErr() == 0) {//no docking stat
 			houses.insert(std::make_pair(house, "missing docking station (no D in house)"));
-			errcnt++
+			errcnt++;
 		}
-		if (house.getErr() > 1) {
+		if (house.getErr() > 1) {//too many docking stat
 			houses.insert(std::make_pair(house, "too many docking stations (more than one D in house)"));
 			errcnt++;
-		} else
+		} else//1 docking
 			houses.insert(std::make_pair(house, ""));
 	}
+	//if all files are bad
 	if (errcnt == houses.size()) {
 		parent.setErr(true);
-		cout << "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n" << endl;
+		cout<<"All house files in target folder '<full path of target folder>' cannot be opened or are invalid:"<<endl;
+		for (map<House,string>::const_iterator itr = houses.begin(); itr != houses.end(); ++itr) {
+			cout<<(*itr).first.getName()<<":"<<(*itr).second<<endl;
+		}
+
 	}
 }
 
@@ -217,6 +222,7 @@ bool importFiles::importHouses::is_number(const std::string& s) {
 }
 
 const map<House, string>& importFiles::importHouses::getHouses() {
+	return houses;
 }
 
 //-------------------------------------------------------- Nested: import algorithms --------------------------------------------------------//
