@@ -6,12 +6,15 @@
 using namespace std;
 class House {
 	string name;
-	string description;
     char** matrix;
     int dockingX;
     int dockingY;
     int colCount;
     int rowCount;
+    int errCode=1; //code 0 - no docking station; code 1 - ok; code 2 - too many docking stations
+
+    void setWalls();//TODO put walls around
+    void setDock();//TODO set the docking station parameters and count if (num !=1) error
 
 	public:
 	  
@@ -23,7 +26,7 @@ class House {
 	   name - house name
 	   description - house description
 	   */
-      House( char** matrix , int colCount , int rowCount, string& name, string& description );
+      House( char** matrix , int colCount , int rowCount, string name);
       
       /*
        destructor
@@ -32,11 +35,11 @@ class House {
       ~House();
       /*getters*/
       const string& getName();
-      const string& getDescription();
       int getDockStationX();
       int getDockStationY();
       int getColCount();
       int getRowCount();
+      int getErr();
       char** getMatrix() const;
       /*
        * calculate dust amount in house
