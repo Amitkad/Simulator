@@ -124,10 +124,10 @@ class importFiles {
 	//end of nested classes//
 
 	bool err = false;//true iff there was an error
-	const string algorithmPath, housePath, configPath;
-	importAlgs* algorithms; //list of algorithms: <algorithm,Error>
-	importHouses* houses; //list of houses: <house,Error> (if no errors then error="")
-	importConfig* config; //cnfig.ini <parameter,value>
+	string algorithmPath, housePath, configPath;
+	importAlgs* algorithms; //algorithms parser
+	importHouses* houses; //houses parser
+	importConfig* config; //cnfig.ini parser
 
 	//check flags validity and number of parameters
 	bool checkArgValidity(int argc, char* argv[]);
@@ -143,6 +143,8 @@ public:
 	const map<AbstractAlgorithm*, string>& getAlgorithms();
 	const map<House, string>& getHouses();
 	const map<string, int>& getParameters();
+	string getAlgPath() const;
+	string getHousePath() const;
 	bool getErr();
 	//err setter
 	void setErr(bool err);

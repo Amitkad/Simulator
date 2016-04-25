@@ -52,6 +52,12 @@ bool importFiles::getErr() {
 void importFiles::setErr(bool err) {
 	this->err = err;
 }
+string importFiles::getHousePath() const{
+	return housePath;
+}
+string importFiles::getAlgPath() const{
+	return algorithmPath;
+}
 
 //-------------------------------------------------------- Nested: importConfig --------------------------------------------------------//
 
@@ -101,13 +107,23 @@ importFiles::importConfig::importConfig(const string& iniPath, importFiles& _par
 	this->loadFromFile(iniPath);
 	if (parent.getErr())
 		return;
-	checkParameters();
+	checkParameters();//checks all config parameteres exsits
 }
 
 void importFiles::importConfig::checkParameters() {
-	if ((parameters.find("MaxStepsAfterWinner") == parameters.end()) || (parameters.find("BatteryCapacity") == parameters.end())
-			|| (parameters.find("BatteryConsumptionRate") == parameters.end()) || (parameters.find("BatteryRechargeRate") == parameters.end())) {
+	int cnt=0;
+	string missingFiles=string("");
+
+	(parameters.find("MaxStepsAfterWinner") == parameters.end()) ? (missingFiles+="MaxStepsAfterWinner, ", cnt++) : missingFiles+="";
+	(parameters.find("BatteryCapacity") == parameters.end()) ? (missingFiles+="BatteryCapacity, ", cnt++) : missingFiles+="";
+	(parameters.find("BatteryConsumptionRate") == parameters.end()) ? (missingFiles+="BatteryConsumptionRate, ", cnt++) : missingFiles+="";
+	(parameters.find("BatteryRechargeRate") == parameters.end()) ? (missingFiles+="BatteryRechargeRate, ", cnt++) : missingFiles+="";
+
+
+	if (!missingFiles.empty()) {
 		parent.setErr(true);
+		cout << "config.ini missing "<< cnt <<" parameter(s): "<<missingFiles.substr(0,missingFiles.find_last_of(","));
+
 	}
 }
 
@@ -128,7 +144,7 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 		parent.setErr(true);
 		return;
 	}
-	//if there are no house files in the directory
+	//if there are no .house files in the directory
 	if (housesLister.getFilesList().size() == 0) {
 		cout << "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n" << endl;
 		parent.setErr(true);
@@ -148,15 +164,14 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	int maxSteps, rows, cols;
 	char** matrix;
 	size_t errcnt = 0;
-	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) {
-		ifstream fin((*itr).c_str());
-		if (!fin.good()) {  // check open success
+	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) {//for each .house file:
+		ifstream fin((*itr).c_str());//open file
+		if (!fin.good()) {  // check open() success
 			err = string("cannot open file");
 			errcnt++;
 			houses.insert(std::make_pair(new House(NULL, 0, 0, (*itr).substr((*itr).find_last_of("/\\") + 1)), err));
 			continue;
 		}
-
 		fin.ignore(); //skip name line
 		name = (*itr).substr((*itr).find_last_of("/\\") + 1); //get file name from path
 		//get parameters from file and check them
@@ -178,13 +193,13 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		rows = atoi(s_rows.c_str());
 		getline(fin, s_cols);
 		if (!is_number(s_cols)) {
-			err = "line number 3 in house file shall be a positive number, found:" + s_cols;
+			err = "line number 4 in house file shall be a positive number, found:" + s_cols;
 			errcnt++;
 			houses.insert(std::make_pair(new House(NULL, 0, 0, (*itr).substr((*itr).find_last_of("/\\") + 1)), err));
 			continue;
 		}
 		cols = atoi(s_cols.c_str());
-		//allocate memory for the house
+		//allocate memory for the house matrix
 		matrix = (char**) malloc(sizeof(char*) * rows);
 		for (int i = 0; i < rows; i++) {
 			matrix[i] = (char*) malloc(sizeof(char) * cols);
@@ -195,6 +210,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 				for (int k = m; k < cols; k++)
 					matrix[i][k] = SPACE;
 		}
+		//create the house object adn check validity
 		House house = new House(matrix, cols, rows, (*itr).substr((*itr).find_last_of("/\\") + 1));
 		if (house.getErr() == 0) {//no docking stat
 			houses.insert(std::make_pair(house, "missing docking station (no D in house)"));
@@ -209,11 +225,10 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	//if all files are bad
 	if (errcnt == houses.size()) {
 		parent.setErr(true);
-		cout<<"All house files in target folder '<full path of target folder>' cannot be opened or are invalid:"<<endl;
+		cout<<"All house files in target folder" << parent.getHousePath() << "cannot be opened or are invalid:"<<endl;
 		for (map<House,string>::const_iterator itr = houses.begin(); itr != houses.end(); ++itr) {
 			cout<<(*itr).first.getName()<<":"<<(*itr).second<<endl;
 		}
-
 	}
 }
 
@@ -222,7 +237,7 @@ bool importFiles::importHouses::is_number(const std::string& s) {
 }
 
 const map<House, string>& importFiles::importHouses::getHouses() {
-	return houses;
+	return houses; //TODO return only good houses in vector; create another getter for only errors
 }
 
 //-------------------------------------------------------- Nested: import algorithms --------------------------------------------------------//
