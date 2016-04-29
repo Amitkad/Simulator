@@ -13,8 +13,8 @@ class House {
     int rowCount;
     int errCode=1; //code 0 - no docking station; code 1 - ok; code 2 - too many docking stations
 
-    void setWalls();//TODO put walls around
-    void setDock();//TODO set the docking station parameters and count if (num !=1) error
+    void setWalls();// put walls around
+    void setDock();//sets the docking station (x,y) and count if put error if no docking or more than one docking station.
 
 	public:
 	  
@@ -34,7 +34,7 @@ class House {
        */
       ~House();
       /*getters*/
-      const string& getName();
+      const string& getName()const;
       int getDockStationX();
       int getDockStationY();
       int getColCount();
