@@ -9,7 +9,7 @@ using namespace std;
 
 //c'tor
 importFiles::importFiles(int argc, char* argv[]) :
-		algorithmPath(""), housePath(""), configPath("config.ini") {
+		algorithmPath("./"), housePath("./"), configPath("./config.ini") {
 
 	if (!checkArgValidity(argc, argv))
 		return;
@@ -44,18 +44,25 @@ const map<House, string>& importFiles::getHouses() {
 const map<string, int>& importFiles::getParameters() {
 	return config->getParameters();
 }
-//err getter
-bool importFiles::getErr() {
-	return this->err;
-}
-//err  setter
+
+//setters
 void importFiles::setErr(bool err) {
 	this->err = err;
 }
-string importFiles::getHousePath() const{
+void importFiles::setHousePath(const string path){
+	this->housePath=path;
+}
+void importFiles::setAlgPath(const string path){
+	this->algorithmPath=path;
+}
+// getters
+bool importFiles::getErr() {
+	return this->err;
+}
+string importFiles::getHousePath() const {
 	return housePath;
 }
-string importFiles::getAlgPath() const{
+string importFiles::getAlgPath() const {
 	return algorithmPath;
 }
 
@@ -107,22 +114,21 @@ importFiles::importConfig::importConfig(const string& iniPath, importFiles& _par
 	this->loadFromFile(iniPath);
 	if (parent.getErr())
 		return;
-	checkParameters();//checks all config parameteres exsits
+	checkParameters(); //checks all config parameteres exsits
 }
 
 void importFiles::importConfig::checkParameters() {
-	int cnt=0;
-	string missingFiles=string("");
+	int cnt = 0;
+	string missingFiles = string("");
 
-	(parameters.find("MaxStepsAfterWinner") == parameters.end()) ? (missingFiles+="MaxStepsAfterWinner, ", cnt++) : missingFiles+="";
-	(parameters.find("BatteryCapacity") == parameters.end()) ? (missingFiles+="BatteryCapacity, ", cnt++) : missingFiles+="";
-	(parameters.find("BatteryConsumptionRate") == parameters.end()) ? (missingFiles+="BatteryConsumptionRate, ", cnt++) : missingFiles+="";
-	(parameters.find("BatteryRechargeRate") == parameters.end()) ? (missingFiles+="BatteryRechargeRate, ", cnt++) : missingFiles+="";
-
+	(parameters.find("MaxStepsAfterWinner") == parameters.end()) ? (missingFiles += "MaxStepsAfterWinner, ", cnt++) : missingFiles += "";
+	(parameters.find("BatteryCapacity") == parameters.end()) ? (missingFiles += "BatteryCapacity, ", cnt++) : missingFiles += "";
+	(parameters.find("BatteryConsumptionRate") == parameters.end()) ? (missingFiles += "BatteryConsumptionRate, ", cnt++) : missingFiles += "";
+	(parameters.find("BatteryRechargeRate") == parameters.end()) ? (missingFiles += "BatteryRechargeRate, ", cnt++) : missingFiles += "";
 
 	if (!missingFiles.empty()) {
 		parent.setErr(true);
-		cout << "config.ini missing "<< cnt <<" parameter(s): "<<missingFiles.substr(0,missingFiles.find_last_of(","));
+		cout << "config.ini missing " << cnt << " parameter(s): " << missingFiles.substr(0, missingFiles.find_last_of(","));
 
 	}
 }
@@ -138,12 +144,13 @@ const map<string, int>& importFiles::importConfig::getParameters() {
 importFiles::importHouses::importHouses(const string& iniPath, importFiles& _parent) :
 		parent(_parent) {
 	FilesListerWithSuffix housesLister = FilesListerWithSuffix(iniPath, ".house");
-	//if dir didnt exsit
+	//if dir is missing and no
 	if (housesLister.getErr()) {
 		cout << "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
+	parent.setHousePath(housesLister.getBasePath());
 	//if there are no .house files in the directory
 	if (housesLister.getFilesList().size() == 0) {
 		cout << "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n" << endl;
@@ -153,7 +160,6 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 	insertHousesFromFile(housesLister.getFilesList());
 	if (parent.getErr())
 		return;
-	checkHousesValidity();//TODO
 
 }
 
@@ -164,8 +170,8 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	int maxSteps, rows, cols;
 	char** matrix;
 	size_t errcnt = 0;
-	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) {//for each .house file:
-		ifstream fin((*itr).c_str());//open file
+	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) { //for each .house file:
+		ifstream fin((*itr).c_str()); //open file
 		if (!fin.good()) {  // check open() success
 			err = string("cannot open file");
 			errcnt++;
@@ -212,22 +218,23 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		}
 		//create the house object adn check validity
 		House house = new House(matrix, cols, rows, (*itr).substr((*itr).find_last_of("/\\") + 1));
-		if (house.getErr() == 0) {//no docking stat
+		if (house.getErr() == 0) {		//no docking stat
 			houses.insert(std::make_pair(house, "missing docking station (no D in house)"));
 			errcnt++;
 		}
-		if (house.getErr() > 1) {//too many docking stat
+		if (house.getErr() > 1) {		//too many docking stat
 			houses.insert(std::make_pair(house, "too many docking stations (more than one D in house)"));
 			errcnt++;
-		} else//1 docking
+		} else
+			//1 docking
 			houses.insert(std::make_pair(house, ""));
 	}
 	//if all files are bad
 	if (errcnt == houses.size()) {
 		parent.setErr(true);
-		cout<<"All house files in target folder" << parent.getHousePath() << "cannot be opened or are invalid:"<<endl;
-		for (map<House,string>::const_iterator itr = houses.begin(); itr != houses.end(); ++itr) {
-			cout<<(*itr).first.getName()<<":"<<(*itr).second<<endl;
+		cout << "All house files in target folder" << parent.getHousePath() << "cannot be opened or are invalid:" << endl;
+		for (map<House, string>::const_iterator itr = houses.begin(); itr != houses.end(); ++itr) {
+			cout << (*itr).first.getName() << ":" << (*itr).second << endl;
 		}
 	}
 }
@@ -245,6 +252,24 @@ const map<House, string>& importFiles::importHouses::getHouses() {
 //TODO
 importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent) :
 		parent(_parent) {
+	FilesListerWithSuffix algorithmLister = FilesListerWithSuffix(iniPath, ".so");
+	//if dir didnt exsit
+	if (algorithmLister.getErr()) {
+		cout << "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n" << endl;
+		parent.setErr(true);
+		return;
+	}
+	parent.setAlgPath(algorithmLister.getBasePath());
+	//if there are no .so files in the directory
+	if (algorithmLister.getFilesList().size() == 0) {
+		cout << "Usage: simulator [­config <config path>] [­house_path <house path>][­algorithm_path <algorithm path>]\n" << endl;
+		parent.setErr(true);
+		return;
+	}
+	insertHousesFromFile(algorithmLister.getFilesList());
+	if (parent.getErr())
+		return;
+	checkHousesValidity(); //TODO
 }
 
 const map<AbstractAlgorithm*, string>& importFiles::importAlgs::getAlgorithms() {
@@ -280,11 +305,12 @@ void importFiles::FilesLister::refresh() {
 		if (errno == ENOENT) //if sirectory does not exsits check in current dir
 		{
 			basePath_ = string(".");
+
 			refresh();
 			return;
 
 		} else {
-			this->setErr(true);
+			err = true;
 			return;
 		}
 	}
@@ -293,10 +319,6 @@ void importFiles::FilesLister::refresh() {
 
 bool importFiles::FilesLister::getErr() {
 	return this->err;
-}
-//err setter
-void importFiles::FilesLister::setErr(bool err) {
-	this->err = err;
 }
 
 vector<string> importFiles::FilesLister::getFilesList() {
@@ -328,5 +350,9 @@ void importFiles::FilesListerWithSuffix::filterFiles() {
 			this->filesList_.push_back(*itr);
 		}
 	}
+}
+
+string importFiles::FilesListerWithSuffix::getBasePath() const{
+	return basePath_;
 }
 

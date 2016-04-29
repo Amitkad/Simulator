@@ -113,6 +113,7 @@ class importFiles {
 	public:
 	  FilesListerWithSuffix(const string& basePath, const string& suffix);
 	  virtual void refresh();
+	  string getBasePath() const;
 
 	protected:
 	  void filterFiles();
@@ -143,11 +144,14 @@ public:
 	const map<AbstractAlgorithm*, string>& getAlgorithms();
 	const map<House, string>& getHouses();
 	const map<string, int>& getParameters();
+	//getters
 	string getAlgPath() const;
 	string getHousePath() const;
 	bool getErr();
-	//err setter
-	void setErr(bool err);
+	// setters
+	void setErr(const bool err);
+	void setHousePath(const string path);
+	void setAlgPath(const string path);
 };
 
 #endif /* INPUTPARSER_H_ */
