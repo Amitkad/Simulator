@@ -24,7 +24,6 @@ using namespace std;
 //TODO put comments
 class importFiles {
 
-
 	// ---------- config parser nested private class -------//
 	class importConfig {
 		importFiles& parent;
@@ -118,10 +117,10 @@ class importFiles {
 	//end of nested classes//
 
 	bool err = false;//true iff there was an error
-	string algorithmPath, housePath, configPath;
+	string algorithmPath, housePath, configPath; //paths of algorithms, houses, config directories
 	importAlgs* algorithms; //algorithms parser
 	importHouses* houses; //houses parser
-	importConfig* config; //cnfig.ini parser
+	importConfig* config; //config.ini parser
 
 	//check flags validity and number of parameters
 	void checkArgValidity(int argc, char* argv[]);
@@ -134,6 +133,7 @@ class importFiles {
 public:
 	//c'tor
 	importFiles(int argc, char* argv[]);
+	~importFiles();
 
 	//class member getters
 	map<string,pair<AbstractAlgorithm*,string>>& getAlgorithms();

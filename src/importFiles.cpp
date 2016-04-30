@@ -20,18 +20,18 @@ importFiles::importFiles(int argc, char* argv[]) :
 //check flags validity and number of parameters, updates to new paths and put error accordingly
 void importFiles::checkArgValidity(int argc, char* argv[]) {
 
-	checkFlag(argc,argv,string("-config"), configPath);
+	checkFlag(argc, argv, string("-config"), configPath);
 	if (err)
 		return;
-	checkFlag(argc,argv,string("-house_path"), housePath);
+	checkFlag(argc, argv, string("-house_path"), housePath);
 	if (err)
 		return;
-	checkFlag(argc,argv,string("­-algorithm_path"), algorithmPath);
+	checkFlag(argc, argv, string("­-algorithm_path"), algorithmPath);
 	if (err)
 		return;
 }
 void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& pathVariable) {
-	int i = indexOf(argc,argv,toCheck);
+	int i = indexOf(argc, argv, toCheck);
 	if (i != -1) {
 		if (i != (argc - 1)) {
 			if ((string(argv[i + 1]) != "-config") && (string(argv[i + 1]) != "-house_path") && (string(argv[i + 1]) != "-algorithm_path")) {
@@ -41,7 +41,7 @@ void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& path
 				cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
 				return;
 			}
-		}else {
+		} else {
 			setErr(true);
 			cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
 			return;
@@ -49,14 +49,14 @@ void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& path
 	}
 }
 
-int importFiles::indexOf(int argc, char* argv[], string toFind){
-	std::vector<std::string> args(argv, argv+argc);
-	  for (size_t i = 1; i < args.size(); ++i) {
-	      if (args[i] == toFind) {
-	          return i;
-	      }
-	  }
-	  return -1;
+int importFiles::indexOf(int argc, char* argv[], string toFind) {
+	std::vector<std::string> args(argv, argv + argc);
+	for (size_t i = 1; i < args.size(); ++i) {
+		if (args[i] == toFind) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 void importFiles::fillInputFromFiles(int argc, char* argv[]) {
@@ -218,6 +218,10 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 		return;
 
 }
+importFiles::importHouses::~importHouses() {
+	for (auto itr = houses.begin(); itr != houses.end(); itr++)
+		delete itr->second;
+}
 
 void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	string name;
@@ -325,6 +329,10 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 	insertAlgsFromFile(algorithmLister.getFilesList());
 	if (parent.getErr())
 		return;
+}
+importFiles::importAlgs::~importAlgs() {
+	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)
+		dlclose()//TODO dlclose here or after creating the new object
 }
 
 void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
