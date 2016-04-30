@@ -17,7 +17,7 @@
 #include <errno.h>
 #include <dlfcn.h>
 #include "AbstractAlgorithm.h"
-#include "house.h"
+#include "House.h"
 
 using namespace std;
 
@@ -39,13 +39,13 @@ class importFiles {
 		 * iniPath - path for config file
 		 */
 		void loadFromFile(const string& iniPath);
-		//TODO - ъйтег
+		//TODO - пїЅпїЅпїЅпїЅпїЅ
 		void checkParameters();
 	public:
 		//c'tor
 		importConfig(const string& iniPath,importFiles& _parent);
 		//"parametrs" getter function
-		const map<string, int>& getParameters();
+		 const map<string, int>& getParameters() const;
 	};
 
 
@@ -53,7 +53,7 @@ class importFiles {
 	// ---------- houses parser nested private class -------//
 	class importHouses {
 		importFiles& parent;
-		map<House, string> houses; //list of houses: <house,Error> (if no errors then error="")
+		map<House*, string> houses; //list of houses: <house*,Error> (if no errors then error="")
 
 		void insertHousesFromFile(vector<string> dirList);
 		static bool is_number(const std::string& s);
@@ -62,7 +62,7 @@ class importFiles {
 		//c'tor
 		importHouses(const string& iniPath,importFiles& _parent);
 		//"houses" getter function
-		const map<House, string>& getHouses();
+		 const map<House*, string>& getHouses() const;
 	};
 
 	// ---------- algorithms parser nested private class -------//
@@ -76,7 +76,7 @@ class importFiles {
 			//c'tor
 			importAlgs(const string& iniPath,importFiles& _parent);
 			//"algorithms" getter function
-			const map<string,pair<AbstractAlgorithm*,string>>& getAlgorithms();
+			 map<string,pair<AbstractAlgorithm*,string>>& getAlgorithms();
 		};
 
 	// ---------- fileLister in use with algorithms and houses -------//
@@ -135,9 +135,9 @@ public:
 
 	//class member getters
 	map<string,pair<AbstractAlgorithm*,string>>& getAlgorithms();
-	map<House, string>& getHouses() const;
-	vector<House>& getGoodHouses() const;
-	map<string, int>& getParameters()const;
+	const map<House*, string>& getHouses() const;
+	vector<House*> getGoodHouses() const;
+	const map<string, int>& getParameters()const;
 
 	string getAlgPath() const;
 	string getHousePath() const;
