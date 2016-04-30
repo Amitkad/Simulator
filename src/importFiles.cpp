@@ -11,14 +11,52 @@ using namespace std;
 importFiles::importFiles(int argc, char* argv[]) :
 		algorithmPath("./"), housePath("./"), configPath("./config.ini") {
 
-	if (!checkArgValidity(argc, argv))
+	checkArgValidity(argc, argv);
+	if (err)
 		return;
 	this->fillInputFromFiles(argc, argv);
 }
 
 //check flags validity and number of parameters, updates to new paths and put error accordingly
-bool importFiles::checkArgValidity(int argc, char* argv[]) {
-	return true; //TODO
+void importFiles::checkArgValidity(int argc, char* argv[]) {
+
+	checkFlag(argc,argv,string("-config"), configPath);
+	if (err)
+		return;
+	checkFlag(argc,argv,string("-house_path"), housePath);
+	if (err)
+		return;
+	checkFlag(argc,argv,string("­-algorithm_path"), algorithmPath);
+	if (err)
+		return;
+}
+void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& pathVariable) {
+	int i = indexOf(argc,argv,toCheck);
+	if (i != -1) {
+		if (i != (argc - 1)) {
+			if ((string(argv[i + 1]) != "-config") && (string(argv[i + 1]) != "-house_path") && (string(argv[i + 1]) != "-algorithm_path")) {
+				pathVariable = string(argv[i + 1]);
+			} else {
+				setErr(true);
+				cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+				return;
+			}
+		}else {
+			setErr(true);
+			cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+			return;
+		}
+	}
+}
+
+int importFiles::indexOf(int argc, char* argv[], string toFind){
+	std::vector<std::string> args(argv, argv+argc);
+	  for (size_t i = 1; i < args.size(); ++i) {
+	      if (args[i] == toFind) {
+	          return i;
+	      }
+	  }
+	  return -1;
 }
 
 void importFiles::fillInputFromFiles(int argc, char* argv[]) {
@@ -31,7 +69,7 @@ void importFiles::fillInputFromFiles(int argc, char* argv[]) {
 	houses = new importFiles::importHouses(housePath, *this);
 	if (err)
 		return;
-	cout<<"success"<<endl;
+	cout << "success" << endl;
 
 }
 
@@ -149,7 +187,7 @@ void importFiles::importConfig::checkParameters() {
 	}
 	if (!missingFiles.empty()) {
 		parent.setErr(true);
-		cout << "config.ini missing " << cnt << " parameter(s): " << missingFiles.substr(0, missingFiles.find_last_of(","))<< endl;
+		cout << "config.ini missing " << cnt << " parameter(s): " << missingFiles.substr(0, missingFiles.find_last_of(",")) << endl;
 	}
 }
 
@@ -164,14 +202,14 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 	FilesListerWithSuffix housesLister = FilesListerWithSuffix(iniPath, ".house");
 //if dir is missing and no
 	if (housesLister.getErr()) {
-		cout << "Usage: simulator [�config <config path>] [�house_path <house path>][�algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
 	parent.setHousePath(housesLister.getBasePath());
 //if there are no .house files in the directory
 	if (housesLister.getFilesList().size() == 0) {
-		cout << "Usage: simulator [�config <config path>] [�house_path <house path>][�algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -262,7 +300,7 @@ bool importFiles::importHouses::is_number(const std::string& s) {
 	return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) {return !std::isdigit(c);}) == s.end();
 }
 
-const map<House*, string>& importFiles::importHouses::getHouses() const{
+const map<House*, string>& importFiles::importHouses::getHouses() const {
 	return houses;
 }
 
@@ -273,14 +311,14 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 	FilesListerWithSuffix algorithmLister = FilesListerWithSuffix(iniPath, ".so");
 //if dir didnt exsit
 	if (algorithmLister.getErr()) {
-		cout << "Usage: simulator [�config <config path>] [�house_path <house path>][�algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
 	parent.setAlgPath(algorithmLister.getBasePath());
 //if there are no .so files in the directory
 	if (algorithmLister.getFilesList().size() == 0) {
-		cout << "Usage: simulator [�config <config path>] [�house_path <house path>][�algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -299,14 +337,14 @@ void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
 		if (hndl == nullptr) { //if there was an error opening .so file
 			err = string("file cannot be loaded or is not a valid .so");
 			errcnt++;
-			algorithms.insert(make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), pair<AbstractAlgorithm*,string>(NULL, err))); //insert <file_name,<NULL,err>>
+			algorithms.insert(make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), pair<AbstractAlgorithm*, string>(NULL, err))); //insert <file_name,<NULL,err>>
 			continue;
 		}
 		maker algMaker = (maker) dlsym(hndl, "getAbstractAlgorithmPointer");
 		if (algMaker == nullptr) {
-			err = string("file cannot be loaded or is not a valid .so");//TODO
+			err = string("file cannot be loaded or is not a valid .so"); //TODO
 			errcnt++;
-			algorithms.insert(std::make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), pair<AbstractAlgorithm*,string>(NULL, err))); //insert <file_name,<NULL,err>>
+			algorithms.insert(std::make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), pair<AbstractAlgorithm*, string>(NULL, err))); //insert <file_name,<NULL,err>>
 			continue;
 		}
 		algorithms.insert(make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), make_pair(algMaker(), err))); //insert <file_name,<new alg,err>>

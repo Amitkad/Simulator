@@ -124,7 +124,9 @@ class importFiles {
 	importConfig* config; //cnfig.ini parser
 
 	//check flags validity and number of parameters
-	bool checkArgValidity(int argc, char* argv[]);
+	void checkArgValidity(int argc, char* argv[]);
+	void checkFlag(int argc, char* argv[], string toCheck, string& pathVariable);
+	int indexOf(int argc, char* argv[], string toFind);
 
 	//fills config, algorithms and houses data from files
 	void fillInputFromFiles(int argc, char* argv[]);
