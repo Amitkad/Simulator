@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//TODO - destructors
+//TODO - destructors,move,copy...
 // -------------------------------------------------- Base Class: import files --------------------------------------------------------//
 
 //c'tor
@@ -35,13 +35,22 @@ void importFiles::fillInputFromFiles(int argc, char* argv[]) {
 }
 
 //class member getters
-const map<AbstractAlgorithm*, string>& importFiles::getAlgorithms() {
+map<string, pair<AbstractAlgorithm*, string>>& importFiles::getAlgorithms() {
 	return algorithms->getAlgorithms();
 }
-const map<House, string>& importFiles::getHouses() {
+map<House, string>& importFiles::getHouses() const {
 	return houses->getHouses();
 }
-const map<string, int>& importFiles::getParameters() {
+vector<House>& importFiles::getGoodHouses() const {
+	vector<House> vec;
+	map<House, string> map = houses->getHouses();
+	for (auto itr = map.begin(); itr != map.end(); ++itr) {
+		if (itr->second.empty())
+			vec.push_back(itr->first);
+	}
+	return vec;
+}
+map<string, int>& importFiles::getParameters() const {
 	return config->getParameters();
 }
 
@@ -49,11 +58,11 @@ const map<string, int>& importFiles::getParameters() {
 void importFiles::setErr(bool err) {
 	this->err = err;
 }
-void importFiles::setHousePath(const string path){
-	this->housePath=path;
+void importFiles::setHousePath(const string path) {
+	this->housePath = path;
 }
-void importFiles::setAlgPath(const string path){
-	this->algorithmPath=path;
+void importFiles::setAlgPath(const string path) {
+	this->algorithmPath = path;
 }
 // getters
 bool importFiles::getErr() {
@@ -129,7 +138,6 @@ void importFiles::importConfig::checkParameters() {
 	if (!missingFiles.empty()) {
 		parent.setErr(true);
 		cout << "config.ini missing " << cnt << " parameter(s): " << missingFiles.substr(0, missingFiles.find_last_of(","));
-
 	}
 }
 
@@ -138,8 +146,6 @@ const map<string, int>& importFiles::importConfig::getParameters() {
 }
 
 //-------------------------------------------------------- Nested: import houses --------------------------------------------------------//
-
-//TODO
 
 importFiles::importHouses::importHouses(const string& iniPath, importFiles& _parent) :
 		parent(_parent) {
@@ -165,9 +171,9 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 
 void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	string name;
-	string s_maxSteps, s_rows, s_cols;
+	string s_maxSteps, s_rows, s_cols; //value in string
 	string err, line;
-	int maxSteps, rows, cols;
+	int maxSteps, rows, cols; //values in numbers
 	char** matrix;
 	size_t errcnt = 0;
 	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) { //for each .house file:
@@ -244,12 +250,11 @@ bool importFiles::importHouses::is_number(const std::string& s) {
 }
 
 const map<House, string>& importFiles::importHouses::getHouses() {
-	return houses; //TODO return only good houses in vector; create another getter for only errors
+	return houses;
 }
 
 //-------------------------------------------------------- Nested: import algorithms --------------------------------------------------------//
 
-//TODO
 importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent) :
 		parent(_parent) {
 	FilesListerWithSuffix algorithmLister = FilesListerWithSuffix(iniPath, ".so");
@@ -266,14 +271,46 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 		parent.setErr(true);
 		return;
 	}
-	insertHousesFromFile(algorithmLister.getFilesList());
+	insertAlgsFromFile(algorithmLister.getFilesList());
 	if (parent.getErr())
 		return;
-	checkHousesValidity(); //TODO
 }
 
-const map<AbstractAlgorithm*, string>& importFiles::importAlgs::getAlgorithms() {
+void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
+	string err = "";
+	size_t errcnt = 0;
+	void *hndl;
+	typedef AbstractAlgorithm* (*maker)();
+	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) { //for each .house file:
+		hndl = dlopen((*itr).c_str(), RTLD_NOW);
+		if (hndl == nullptr) { //if there was an error opening .so file
+			err = string("file cannot be loaded or is not a valid .so");
+			errcnt++;
+			algorithms.insert(std::make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), std::make_pair(NULL, err))); //insert <file_name,<NULL,err>>
+			continue;
+		}
+		maker algMaker = (maker) dlsym(hndl, "getAbstractAlgorithmPointer");
+		if (algMaker == nullptr) {
+			err = string("file cannot be loaded or is not a valid .so");
+			errcnt++;
+			algorithms.insert(std::make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), std::make_pair(NULL, err))); //insert <file_name,<NULL,err>>
+			continue;
+		}
+		algorithms.insert(std::make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), std::make_pair(algMaker(), err))); //insert <file_name,<new alg,err>>
+	}
+	//if all files in folder are bad
+	if (errcnt == algorithms.size()) {
+		parent.setErr(true);
+		cout << "All house files in target folder" << parent.getAlgPath() << "cannot be opened or are invalid:" << endl;
+		for (auto itr = algorithms.begin(); itr != algorithms.end(); ++itr) {
+			cout << (*itr).first << ":" << (*itr).second.second << endl;
+		}
+		return;
+	}
+}
 
+const map<string, pair<AbstractAlgorithm*, string>>& importFiles::importAlgs::getAlgorithms() {
+	return algorithms;
 }
 
 //-------------------------------------------------------- Nested: FileLister --------------------------------------------------------//
@@ -352,7 +389,7 @@ void importFiles::FilesListerWithSuffix::filterFiles() {
 	}
 }
 
-string importFiles::FilesListerWithSuffix::getBasePath() const{
+string importFiles::FilesListerWithSuffix::getBasePath() const {
 	return basePath_;
 }
 

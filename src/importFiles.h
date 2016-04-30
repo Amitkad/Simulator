@@ -15,6 +15,7 @@
 #include <dirent.h>
 #include <algorithm>
 #include <errno.h>
+#include <dlfcn.h>
 #include "AbstractAlgorithm.h"
 #include "house.h"
 
@@ -47,45 +48,37 @@ class importFiles {
 		const map<string, int>& getParameters();
 	};
 
-	// ---------- algorithms parser nested private class -------//
-	class importAlgs {
-		importFiles& parent;
-		map<AbstractAlgorithm*, string> algorithms; //list of algorithms: <algorithm,Error>(if no errors then error="")
 
-		/*load the file iniPath or default config.ini if iniPath doesn't exists
-		 * @param
-		 * iniPath - path for config file
-		 */
-		void loadFromFile(const string& iniPath);
-	public:
-		//c'tor
-		importAlgs(const string& iniPath,importFiles& _parent);
-		//"algorithms" getter function
-		const map<AbstractAlgorithm*, string>& getAlgorithms();
-	};
 
 	// ---------- houses parser nested private class -------//
 	class importHouses {
 		importFiles& parent;
 		map<House, string> houses; //list of houses: <house,Error> (if no errors then error="")
 
-
 		void insertHousesFromFile(vector<string> dirList);
-
-		void checkHousesValidity();
 		static bool is_number(const std::string& s);
 
-		/*load the file iniPath or default config.ini if iniPath doesn't exists
-		 * @param
-		 * iniPath - path for config file
-		 */
-		void loadFromFile(const string& iniPath);
 	public:
 		//c'tor
 		importHouses(const string& iniPath,importFiles& _parent);
 		//"houses" getter function
 		const map<House, string>& getHouses();
 	};
+
+	// ---------- algorithms parser nested private class -------//
+		class importAlgs {
+			importFiles& parent;
+			map<string,pair<AbstractAlgorithm*,string>> algorithms; //list of algorithms: map<alg_name,pair<abstractAlgorithm*, err_string>>(if no errors then error="")
+
+			void insertAlgsFromFile(vector<string> dirList);
+
+		public:
+			//c'tor
+			importAlgs(const string& iniPath,importFiles& _parent);
+			//"algorithms" getter function
+			const map<string,pair<AbstractAlgorithm*,string>>& getAlgorithms();
+		};
+
 	// ---------- fileLister in use with algorithms and houses -------//
 
 	class FilesLister
@@ -141,10 +134,11 @@ public:
 	importFiles(int argc, char* argv[]);
 
 	//class member getters
-	const map<AbstractAlgorithm*, string>& getAlgorithms();
-	const map<House, string>& getHouses();
-	const map<string, int>& getParameters();
-	//getters
+	map<string,pair<AbstractAlgorithm*,string>>& getAlgorithms();
+	map<House, string>& getHouses() const;
+	vector<House>& getGoodHouses() const;
+	map<string, int>& getParameters()const;
+
 	string getAlgPath() const;
 	string getHousePath() const;
 	bool getErr();
