@@ -45,22 +45,22 @@ const string& House::getName() const {
 	return this->name;
 }
 
-int House::getDockStationX() {
+int House::getDockStationX() const {
 	return this->dockingX;
 }
-int House::getDockStationY() {
+int House::getDockStationY() const {
 	return this->dockingY;
 }
-int House::getColCount() {
+int House::getColCount() const {
 	return this->colCount;
 }
-int House::getRowCount() {
+int House::getRowCount() const{
 	return this->rowCount;
 }
 char** House::getMatrix() const {
 	return this->matrix;
 }
-int House::getErr(){
+int House::getErr()const{
 	return errCode;
 }
 int House::initDustAmount() {
