@@ -21,31 +21,47 @@
 
 using namespace std;
 
-//TODO put comments
+/*a class which load program's files:
+ * 			1. checking cmd line arguments validity
+ * 			2. opens config file, checks data valididy and loads it into the program
+ * 			3. opens all houses files, checks data valididy and loads them into the program
+ * 			4. dynamically loads all .so algorithms into the program.
+ */
+
 class importFiles {
 
 	// ---------- config parser nested private class -------//
+
+	// subClass in charge of config file load
 	class importConfig {
-		importFiles& parent;
+
+		importFiles& parent; //pointer to base class
 		map<string, int> parameters; //config.ini <parameter,value>
+
 		/*splits, trims and put result in "parameters"
 		 * @param
 		 * line - a text input
 		 */
 		void processLine(const string& line);
+
 		/*load the file iniPath or default config.ini if iniPath doesn't exists
 		 * @param
 		 * iniPath - path for config file
 		 */
 		void loadFromFile(const string& iniPath);
+
+		//check all necessary parameters were loaded
 		void checkParameters();
+
 	public:
 		//c'tor
 		importConfig(const string& iniPath,importFiles& _parent);
 		//d'ctor
 		~importConfig();
+		//no need for operator= and copy c'tor
 		importConfig& operator=(const importConfig&)=delete;
 		importConfig(const importConfig&) = delete;
+
 		//"parametrs" getter function
 		 const map<string, int>& getParameters() const;
 	};
@@ -53,17 +69,20 @@ class importFiles {
 
 
 	// ---------- houses parser nested private class -------//
+
+	// subClass in charge of .house files load
 	class importHouses {
-		importFiles& parent;
+		importFiles& parent;//pointer to base class
 		map<House*, string> houses; //list of houses: <house*,Error> (if no errors then error="")
 
 		void insertHousesFromFile(vector<string> dirList);
 		static bool is_number(const std::string& s);
 
 	public:
-		//c'tor
+		//c'tor, d'tor
 		importHouses(const string& iniPath,importFiles& _parent);
 		~importHouses();
+		//no need for operator= and copy c'tor
 		importHouses& operator=(const importHouses&)=delete;
 		importHouses(const importHouses&) = delete;
 
@@ -73,8 +92,10 @@ class importFiles {
 	};
 
 	// ---------- algorithms parser nested private class -------//
+
+	// subClass in charge of .so algorithm files dynamic load
 		class importAlgs {
-			importFiles& parent;
+			importFiles& parent;//pointer to base class
 			map<string,pair<AbstractAlgorithm*,string>> algorithms; //list of algorithms: map<alg_name,pair<abstractAlgorithm*, err_string>>(if no errors then error="")
 			vector<void*> handlers;//handlers list to dlclose in d'ctor
 

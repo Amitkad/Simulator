@@ -5,7 +5,8 @@
 // Copyright   : 
 // Description : Hello World in C++, Ansi-style
 //============================================================================
-#include "randAlgorithm.h"
+#include <iostream>
+#include <cstdlib>
 #include "SimpleSensor.h"
 #include "auxillary.h"
 #include "configParser.h"
@@ -77,15 +78,15 @@ int main(int argc, char *argv[]) {
 		config = new configParser("config.ini");
 		break;
 	}
-	House* houseP = new House(matrix, static_cast<int>(cols),static_cast<int>(rows), houseName);//house saves the house matrix and othe configurations
-	AbstractAlgorithm* algorithm = new randAlgorithm();//creating algorithm run object
-	Simulator* simulator = new Simulator(houseP, config->getParameters(),algorithm);//creating simulator
-	simulator->run();//running algorithms on the houses
+//	House* houseP = new House(matrix, static_cast<int>(cols),static_cast<int>(rows), houseName);//house saves the house matrix and othe configurations
+////	AbstractAlgorithm* algorithm = new randAlgorithm();//creating algorithm run object
+////	Simulator* simulator = new Simulator(houseP, config->getParameters(),algorithm);//creating simulator
+//	simulator->run();//running algorithms on the houses
 
 	//release and return
-	delete simulator;
-	delete config;
-	return 0;
+//	delete simulator;
+//	delete config;
+//	return 0;
 }
 
 
