@@ -57,7 +57,7 @@ class importFiles {
 		//c'tor
 		importConfig(const string& iniPath,importFiles& _parent);
 		//d'ctor
-		~importConfig();
+		~importConfig()=default;
 		//no need for operator= and copy c'tor
 		importConfig& operator=(const importConfig&)=delete;
 		importConfig(const importConfig&) = delete;

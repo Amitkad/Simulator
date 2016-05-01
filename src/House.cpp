@@ -8,6 +8,8 @@ House::House(char** matrix, int colCount, int rowCount, string _name) {
 	this->colCount = colCount;
 	this->rowCount = rowCount;
 	this->name = _name;
+	dockingX=0;
+	dockingY=0;
 	this->setWalls();
 	this->setDock();
 }

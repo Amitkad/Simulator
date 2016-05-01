@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//TODO - destructors,move,copy...
+
 // -------------------------------------------------- Base Class: import files --------------------------------------------------------//
 
 //c'tor
@@ -340,7 +340,7 @@ importFiles::importAlgs::~importAlgs() {
 	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)//release algorithm objects
 		delete itr->second.first;
 for (auto itr = handlers.begin(); itr != handlers.end(); itr++)
-		dlclose(*itr);//TODO release algorithms handlers
+		dlclose(*itr);// release algorithms handlers
 }
 
 void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
