@@ -22,16 +22,17 @@ void randAlgorithm::setConfiguration(map<string, int> config) {
 
 Direction randAlgorithm::step() {
 	int dir;
+	SensorInformation s = sensor->sense();
 	do {
 		dir = (rand() % 5);
 //		printf("%s<--move to<-- ",d[dir]);
 		if (dir ==  4) //if stay--> return stay
 			return Direction(dir);
-	} while (sensor->sense().isWall[dir]); //generate random if thre's a wall
+	} while (s.isWall[dir]); //generate random if thre's a wall
 
 	return Direction(dir);
 }
 
 void randAlgorithm::aboutToFinish(int stepsTillFinishing) {
-} //TODO
+} 
 
