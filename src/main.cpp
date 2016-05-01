@@ -19,12 +19,12 @@ int main(int argc, char *argv[]) {
 
 
 	importFiles* files = new importFiles(argc,argv);
-	cout<<files->getGoodHouses().back()->getColCount()<<endl;
+//	cout<<files->getAlgorithms().back()->getColCount()<<endl;
 	cout << "success1" << endl;
 	Simulator* simulator= new Simulator(files->getGoodHouses(),files->getParameters(),files->getAlgorithms());
 	simulator->run();
 
-
+	cout << "success2" << endl;
 
 
 

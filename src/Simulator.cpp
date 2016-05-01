@@ -77,7 +77,7 @@ void Simulator::run() {
   bool* wonAlready = (bool*)malloc(sizeof(int)*this->algorithmsAmount);
   bool winnerFound;
   AbstractSensor** sensors = (AbstractSensor**)malloc(sizeof(AbstractSensor*)*this->algorithmsAmount); 
-  cout<<"run"<<endl;
+//  cout<<"run"<<endl;
   int houseIndex = 0;
   int stepsMadeAfterWinnerFound=0;
 	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
@@ -120,7 +120,7 @@ void Simulator::run() {
 	  for(int stepNumber = 0 ; stepNumber < maxSteps && stepsMadeAfterWinnerFound < this->maxStepsAfterWinner ; stepNumber++){
 		int c = 0;
 	    	for(map<string,pair<AbstractAlgorithm*,string>>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
-		  cout<<this->stepsMade[c]<<endl;
+//		  cout<<this->stepsMade[c]<<endl;
 		  if(algoSentToAWall[c] ||
 		    wonAlready[c] || 
 		    this->batteryUsed[c] > this->batteryCapacity || 
@@ -157,12 +157,12 @@ void Simulator::run() {
 			winnerFound = true;
 		}
 		
-		cout<<"before direction"<<endl;
+//		cout<<"before direction"<<endl;
 
 		Direction algoRecomendation = ((algoIt->second).first)->step();
 //		cout<<endl;
 		int stepResult = 1;
-		cout<<"after algoRecomendation direction"<<endl;
+//		cout<<"after algoRecomendation direction"<<endl;
 
 		switch (algoRecomendation) { //simulator check for algorithm return value
 		case Direction::East:
@@ -180,7 +180,7 @@ void Simulator::run() {
 		case Direction::Stay:
 			break;
 		}
-		cout<<"after direction"<<endl;
+//		cout<<"after direction"<<endl;
 		if (stepResult == 0) {
 			algoSentToAWall[c] = true;
 		}
@@ -209,8 +209,8 @@ void Simulator::run() {
 	    winnerSteps = simulationSteps;
 	    
 	  }
-	  cout<<this->stepsMade[0]<<endl;
-	  cout<<this->stepsMade[1]<<endl;
+//	  cout<<this->stepsMade[0]<<endl;
+//	  cout<<this->stepsMade[1]<<endl;
 
 	  for(map<string,pair<AbstractAlgorithm*,string>>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
 	    int position = 1;
@@ -222,13 +222,13 @@ void Simulator::run() {
 	    }
 	    if(position > 4) position = 4;
 	    scores[houseIndex][y] = calcScore(wonAlready[y],position,y,(*houseIt));
-	      cout<<"--"<<scores[houseIndex][y]<<"--"<<endl;
+//	      cout<<"--"<<scores[houseIndex][y]<<"--"<<endl;
 
 	    y++;
 	  }
 	  houseIndex++; 
 	}
-	cout<<this->stepsMade[1]<<endl;
+//	cout<<this->stepsMade[1]<<endl;
 	
 	//todo print scores
 	
@@ -302,11 +302,11 @@ int Simulator::calcScore(bool wonalready,int position,int i,House* currentHouse)
 	int score = 2000;
 	score -= ((position - 1) * 50); /*we assume the algorithm position is 1 because there is one algorithm in ex1 */
 	score += (this->winnerSteps - this->stepsMade[i]) * (10);
-	cout<<"--"<<score<<"--"<<endl;
+//	cout<<"--"<<score<<"--"<<endl;
 	score -= this->dustAmountInHome[i] * 3;
-	cout<<"--"<<score<<"--"<<endl;
+//	cout<<"--"<<score<<"--"<<endl;
 	score +=(currentXPos[i] == currentHouse->getDockStationX())&& (currentYPos[i] == currentHouse->getDockStationY()) ? 50 : -200;
-	cout<<"--"<<score<<"--"<<endl;
+//	cout<<"--"<<score<<"--"<<endl;
 	return max(0, score);
 }
 
