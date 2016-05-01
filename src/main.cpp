@@ -5,7 +5,7 @@
 // Copyright   : 
 // Description : Hello World in C++, Ansi-style
 //============================================================================
-#include "randAlgorithm.h"
+#include "topDownAlgo.h"
 #include "SimpleSensor.h"
 #include "auxillary.h"
 #include "configParser.h"
@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
 
 	// hard-coding a house...
 	string houseName = "First House";
+	string houseName1 = "Second House";
 	string houseDesc = "A hard coded house";
 	int const rows = 19;
 	int const cols = 81;
@@ -78,8 +79,20 @@ int main(int argc, char *argv[]) {
 		break;
 	}
 	House* houseP = new House(matrix, static_cast<int>(cols),static_cast<int>(rows), houseName,houseDesc);//house saves the house matrix and othe configurations
-	AbstractAlgorithm* algorithm = new randAlgorithm();//creating algorithm run object
-	Simulator* simulator = new Simulator(houseP, config->getParameters(),algorithm);//creating simulator
+	House* houseP1= new House(matrix, static_cast<int>(cols),static_cast<int>(rows), houseName1,houseDesc);//house saves the house matrix and othe configurations
+	AbstractAlgorithm* algorithm = new topDownAlgo();//creating algorithm run object
+	AbstractAlgorithm* algorithm1 = new topDownAlgo();//creating algorithm run object
+	vector<House*> houses;// empty vector of ints
+	map<string, pair<AbstractAlgorithm*,string>> algosMap;
+
+	houses.push_back(houseP);
+	houses.push_back(houseP1);
+	algosMap["regularAlgo"].first = algorithm;
+	algosMap["regularAlgo"].second = "";
+	algosMap["secondAlgo"].first = algorithm1;
+	algosMap["secondAlgo"].second = "";
+	
+	Simulator* simulator = new Simulator(houses, config->getParameters(),algosMap,2,2);//creating simulator
 	simulator->run();//running algorithms on the houses
 
 	//release and return

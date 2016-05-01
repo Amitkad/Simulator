@@ -5,10 +5,10 @@ LD_FLAGS = -lm
 
 all: simulator
 
-simulator:  main.o auxillary.o configParser.o  House.o randAlgorithm.o  SimpleSensor.o Simulator.o 
+simulator:  main.o auxillary.o configParser.o  House.o topDownAlgo.o  SimpleSensor.o Simulator.o 
 	g++ -o $@ $^ $(CC_FLAGS)
 
-main.o: main.cpp randAlgorithm.cpp SimpleSensor.cpp auxillary.cpp configParser.cpp House.cpp Simulator.cpp 
+main.o: main.cpp topDownAlgo.cpp SimpleSensor.cpp auxillary.cpp configParser.cpp House.cpp Simulator.cpp 
 	g++ -c  $(CC_FLAGS) main.cpp
 	
 auxillary.o: auxillary.cpp auxillary.h
@@ -20,8 +20,8 @@ configParser.o: configParser.cpp configParser.h
 House.o: House.cpp House.h
 	g++ -c  $(CC_FLAGS) House.cpp
 	
-randAlgorithm.o: randAlgorithm.cpp randAlgorithm.h
-	g++ -c  $(CC_FLAGS) randAlgorithm.cpp
+topDownAlgo.o: topDownAlgo.cpp topDownAlgo.h
+	g++ -c  $(CC_FLAGS) topDownAlgo.cpp
 	
 SimpleSensor.o: SimpleSensor.cpp SimpleSensor.h
 	g++ -c   $(CC_FLAGS) SimpleSensor.cpp
@@ -31,4 +31,4 @@ Simulator.o: Simulator.cpp Simulator.h
 
 
 clean:
-	rm -f Simulator.o SimpleSensor.o randAlgorithm.o House.o configParser.o auxillary.o main.o simulator
+	rm -f Simulator.o SimpleSensor.o topDownAlgo.o House.o configParser.o auxillary.o main.o simulator

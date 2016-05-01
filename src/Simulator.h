@@ -13,7 +13,7 @@ class Simulator {
 	int algorithmsAmount;
 	int* currentYPos;
 	int* currentXPos;
-	std::vector<char**> matrix;
+	char*** matrixes;
 	int* batteryUsed;
 	int batteryCapacity;
 	int batteryConsumptionRate;
@@ -26,7 +26,7 @@ class Simulator {
 	int simulationSteps;
 	House* house; 
 	std::vector<House*> houses;
-	std::vector<AbstractAlgorithm*> algorithms;
+	std::map<string,pair<AbstractAlgorithm*,string>> algorithms;
 	const map<string, int> config;
 	int** scores;
 	int currentHouse;
@@ -38,8 +38,7 @@ public:
    config - configuration of the simulator
    algorithm - an algorithm to use while running
    */
-	Simulator(House* house, const map<string, int> config,
-			AbstractAlgorithm* algorithm);
+	Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms , int _housesAmount , int _algorithmsAmount);
 	
 	/*
 	 destructor deleting algorithm and house
@@ -51,6 +50,11 @@ public:
 	 then prints the scores
 	 */
 	void run();
+	
+	/*
+	 * prints the scores with the beautifull table 
+	 */
+	void printScores(int houseIndex);
 	/*
 	 * calculates scores
 	    @param
@@ -58,7 +62,7 @@ public:
 	    @return 
 	    returns the score from the run
 	 */
-	int calcScore(bool wonalready);
+	int calcScore(bool wonalready,int position,int i,House* currentHouse);
 	/*
 	 try to move up
 	 @return
