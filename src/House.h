@@ -28,18 +28,18 @@ class House {
 	   */
       House( char** matrix , int colCount , int rowCount, string name);
       
-      /*
-       destructor
-       free the matrix
-       */
+      //d'ctor
       ~House();
+      House& operator=(const House&) = delete;
+      House(const House&) = delete;
+
       /*getters*/
       const string& getName()const;
-      int getDockStationX();
-      int getDockStationY();
-      int getColCount();
-      int getRowCount();
-      int getErr();
+      int getDockStationX() const;
+      int getDockStationY() const;
+      int getColCount() const;
+      int getRowCount() const;
+      int getErr() const;
       char** getMatrix() const;
       /*
        * calculate dust amount in house

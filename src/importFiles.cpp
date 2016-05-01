@@ -17,6 +17,12 @@ importFiles::importFiles(int argc, char* argv[]) :
 	this->fillInputFromFiles(argc, argv);
 }
 
+importFiles::~importFiles(){
+	delete algorithms;
+	delete houses;
+	delete config;
+}
+
 //check flags validity and number of parameters, updates to new paths and put error accordingly
 void importFiles::checkArgValidity(int argc, char* argv[]) {
 
@@ -220,7 +226,7 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 }
 importFiles::importHouses::~importHouses() {
 	for (auto itr = houses.begin(); itr != houses.end(); itr++)
-		delete itr->second;
+		delete itr->first;
 }
 
 void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
@@ -331,8 +337,10 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 		return;
 }
 importFiles::importAlgs::~importAlgs() {
-	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)
-		dlclose()//TODO dlclose here or after creating the new object
+	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)//release algorithm objects
+		delete itr->second.first;
+for (auto itr = handlers.begin(); itr != handlers.end(); itr++)
+		dlclose(*itr);//TODO release algorithms handlers
 }
 
 void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
@@ -342,15 +350,17 @@ void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
 	typedef AbstractAlgorithm* (*maker)();
 	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) { //for each .house file:
 		hndl = dlopen((*itr).c_str(), RTLD_NOW);
+
 		if (hndl == nullptr) { //if there was an error opening .so file
 			err = string("file cannot be loaded or is not a valid .so");
 			errcnt++;
 			algorithms.insert(make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), pair<AbstractAlgorithm*, string>(NULL, err))); //insert <file_name,<NULL,err>>
 			continue;
 		}
+		handlers.push_back(hndl);
 		maker algMaker = (maker) dlsym(hndl, "getAbstractAlgorithmPointer");
 		if (algMaker == nullptr) {
-			err = string("file cannot be loaded or is not a valid .so"); //TODO
+			err = string("valid .so but no algorithm was registered after loading it");
 			errcnt++;
 			algorithms.insert(std::make_pair((*itr).substr((*itr).find_last_of("/\\") + 1), pair<AbstractAlgorithm*, string>(NULL, err))); //insert <file_name,<NULL,err>>
 			continue;
@@ -413,7 +423,7 @@ void importFiles::FilesLister::refresh() {
 	std::sort(this->filesList_.begin(), this->filesList_.end());
 }
 
-bool importFiles::FilesLister::getErr() {
+bool importFiles::FilesLister::getErr() const {
 	return this->err;
 }
 
