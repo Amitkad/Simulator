@@ -12,8 +12,8 @@
 #include <map>
 #include <string>
 #include <cstdlib>
-#include "AbstractAlgorithm.h"
-#include "SimpleSensor.h"
+#include "../AbstractAlgorithm.h"
+#include "../SimpleSensor.h"
 
 using namespace std;
 
@@ -23,6 +23,8 @@ class stayInPlaceAlgo: public AbstractAlgorithm {
 public:
 	stayInPlaceAlgo();
 	~stayInPlaceAlgo();
+	stayInPlaceAlgo& operator=(const stayInPlaceAlgo&) = delete;
+	stayInPlaceAlgo(const stayInPlaceAlgo&) = delete;
 
 	// setSensor is called once when the Algorithm is initialized
 	void setSensor(const AbstractSensor& sensor);

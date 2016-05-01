@@ -24,6 +24,8 @@ class topDownAlgo: public AbstractAlgorithm {
 public:
 	topDownAlgo();
 	~topDownAlgo();
+	topDownAlgo& operator=(const topDownAlgo&) = delete;
+	topDownAlgo(const topDownAlgo&) = delete;
 
 	// setSensor is called once when the Algorithm is initialized
 	void setSensor(const AbstractSensor& sensor);

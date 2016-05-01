@@ -9,6 +9,7 @@
 #include "SimpleSensor.h"
 #include "House.h"
 #include "importFiles.h"
+#include "Simulator.h"
 
 using namespace std;
 
@@ -19,7 +20,9 @@ int main(int argc, char *argv[]) {
 
 	importFiles* files = new importFiles(argc,argv);
 	cout<<files->getGoodHouses().back()->getColCount()<<endl;
-
+	cout << "success1" << endl;
+	Simulator* simulator= new Simulator(files->getGoodHouses(),files->getParameters(),files->getAlgorithms());
+	simulator->run();
 
 
 

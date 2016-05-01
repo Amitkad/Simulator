@@ -7,10 +7,10 @@
 
 using namespace std;
 //CleanAlgorithm algorithm;
-Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms , int _housesAmount , int _algorithmsAmount) :
+Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms) :
 		config(_config) {
-	algorithmsAmount = _algorithmsAmount;
-	housesAmount = _housesAmount;
+	algorithmsAmount = _algorithms.size();
+	housesAmount = _houses.size();
 	maxSteps = _config.find("MaxSteps")->second;
 	maxStepsAfterWinner = _config.find("MaxStepsAfterWinner")->second;
 	batteryCapacity = _config.find("BatteryCapacity")->second;
@@ -20,20 +20,20 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 	winnerSteps = 0;
 	currentHouse = 0;
 	
-	scores = (int**) malloc(sizeof(int*) * _algorithmsAmount);
-	for(int i = 0 ; i < _algorithmsAmount ; i++){
-	  scores[i] = (int*) malloc(sizeof(int) * _housesAmount);
-	  for(int j = 0 ; j < _housesAmount ; j++){
+	scores = (int**) malloc(sizeof(int*) * algorithmsAmount);
+	for(int i = 0 ; i < algorithmsAmount ; i++){
+	  scores[i] = (int*) malloc(sizeof(int) * housesAmount);
+	  for(int j = 0 ; j < housesAmount ; j++){
 	    scores[i][j] = 0;
 	  }
 	}
 	
 	houses = _houses;
-	stepsMade = (int*) malloc(sizeof(int) * _algorithmsAmount);
-	batteryUsed = (int*) malloc(sizeof(int) * _algorithmsAmount);
-	dustAmountInHome = (int*) malloc(sizeof(int) * _algorithmsAmount);
-	currentYPos = (int*) malloc(sizeof(int) * _algorithmsAmount);
-	currentXPos = (int*) malloc(sizeof(int) * _algorithmsAmount);
+	stepsMade = (int*) malloc(sizeof(int) * algorithmsAmount);
+	batteryUsed = (int*) malloc(sizeof(int) * algorithmsAmount);
+	dustAmountInHome = (int*) malloc(sizeof(int) * algorithmsAmount);
+	currentYPos = (int*) malloc(sizeof(int) * algorithmsAmount);
+	currentXPos = (int*) malloc(sizeof(int) * algorithmsAmount);
 	
 	vector<House*>::iterator house = houses.begin();
 	int amountOfDustInFirstHouse = (*house)->initDustAmount(); // should be first house 
@@ -41,7 +41,7 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 	int dockY = (*house)->getDockStationY();
 	
 	
-	for(int i = 0 ; i < _algorithmsAmount ; i++){
+	for(int i = 0 ; i < algorithmsAmount ; i++){
 	  stepsMade[i] = 0;
 	  batteryUsed[i] = 0;
 	  dustAmountInHome[i] = amountOfDustInFirstHouse;
@@ -54,8 +54,8 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 	algorithms = _algorithms;
 	
 	//todo fix matrixes for each algo .
-	matrixes = (char***) malloc(sizeof(char**)*_algorithmsAmount);
-	for(int j=0 ; j < _algorithmsAmount ; j++){
+	matrixes = (char***) malloc(sizeof(char**)*algorithmsAmount);
+	for(int j=0 ; j < algorithmsAmount ; j++){
 	  matrixes[j] = (char**) malloc(sizeof(char*) * (*house)->getRowCount());
 	  for (int i = 0; i < (*house)->getRowCount(); ++i) {
 	    matrixes[j][i] = (char*) malloc(sizeof(char) * (*house)->getColCount());

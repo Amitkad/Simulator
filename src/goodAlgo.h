@@ -27,6 +27,8 @@ class goodAlgo: public AbstractAlgorithm {
 public:
 	goodAlgo();
 	~goodAlgo();
+	      goodAlgo& operator=(const goodAlgo&) = delete;
+      goodAlgo(const goodAlgo&) = delete;
 
 	// setSensor is called once when the Algorithm is initialized
 	void setSensor(const AbstractSensor& sensor);

@@ -75,7 +75,7 @@ void importFiles::fillInputFromFiles(int argc, char* argv[]) {
 	houses = new importFiles::importHouses(housePath, *this);
 	if (err)
 		return;
-	cout << "success" << endl;
+
 
 }
 

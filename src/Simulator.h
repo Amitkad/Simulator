@@ -38,13 +38,15 @@ public:
    config - configuration of the simulator
    algorithm - an algorithm to use while running
    */
-	Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms , int _housesAmount , int _algorithmsAmount);
+	Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms);
 	
 	/*
 	 destructor deleting algorithm and house
 	 */
 	~Simulator();
 	
+	Simulator& operator=(const Simulator&)=delete;
+	Simulator(const Simulator&) = delete;
 	/*
 	 runs the simulator using the algorithm and the config 
 	 then prints the scores
