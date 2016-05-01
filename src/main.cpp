@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 		config = new configParser("config.ini");
 		break;
 	}
-	House* houseP = new House(matrix, static_cast<int>(cols),static_cast<int>(rows), houseName,houseDesc);//house saves the house matrix and othe configurations
+	House* houseP = new House(matrix, static_cast<int>(cols),static_cast<int>(rows), houseName);//house saves the house matrix and othe configurations
 	AbstractAlgorithm* algorithm = new randAlgorithm();//creating algorithm run object
 	Simulator* simulator = new Simulator(houseP, config->getParameters(),algorithm);//creating simulator
 	simulator->run();//running algorithms on the houses
