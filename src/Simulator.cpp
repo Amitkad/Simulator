@@ -85,11 +85,11 @@ Simulator::~Simulator(){
 	free(scores);
 	
 	for(map<string,pair<AbstractAlgorithm*,string>>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
-	  delete (algoIt->second).first;
+	  //delete (algoIt->second).first;
 	}
 
 	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
-	  delete (*houseIt);
+	  //delete (*houseIt);
 	}
 }
 
@@ -258,40 +258,46 @@ void Simulator::run() {
 	  }
 	  free(matrixes[t]);
 	}
-	free(matrixes);
 	//end free matrixes
 	  
 	  houseIndex++; 
 	}
-	
+
 	free(sensors);
 
 	
 	// print scores
 	
+
 	this->printScores(houseIndex);
 	
 
+	
+	  free(stepsMadeAfterWinner);
+  free(algoSentToAWall);
+  free(wonAlready);
 
 
+}
+void Simulator::printLine(int width){
+  for(int i=0;i<width;i++){
+    cout<< '-';
+  }
+  cout<<endl;
 }
 
 void Simulator::printScores(int houseIndex){
   	int tableWidth = 15+11*(houseIndex+1);
 	int houseSize;
 	char houseName[11];
-	char* line = (char*) malloc(sizeof(char)*tableWidth);
-	for(int i = 0 ; i < tableWidth ; i++){
-	  line[i] = '-';
-	  line[i+1] = '\0';
-	}
+
 	//header
-	cout<< line <<endl;
+	printLine(tableWidth);
 	
 	cout << "|             |";
 	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
-		houseSize=min(10,(int)((*houseIt)->getName().size()));
-		strncpy(houseName,((*houseIt)->getName()).c_str(),houseSize);
+		houseSize=min(10,(int)((*houseIt)->getName().substr(0, (*houseIt)->getName().find_last_of(".")).size()));
+		strncpy(houseName,((*houseIt)->getName()).substr(0, (*houseIt)->getName().find_last_of(".")).c_str(),houseSize);
 		houseName[houseSize]='\0';
 		cout<<houseName;
 		for(int k=0;k<10-houseSize;k++){
@@ -302,7 +308,7 @@ void Simulator::printScores(int houseIndex){
 	cout<<"AVG        |"<<endl;
 	
 	//header end.
-	cout<< line <<endl;
+	printLine(tableWidth);
 
 	//printAlgosStart
 	int i=0;
@@ -311,7 +317,7 @@ void Simulator::printScores(int houseIndex){
 	    totalAlgoScore=0;
 	    if(algoIt->second.second.empty()){
 	      cout<<"|";
-	      cout<<algoIt->first;
+	      cout<<algoIt->first.substr(0, algoIt->first.find_last_of("."));
 	      cout<<" |";
 	      for(int j=0;j<this->housesAmount;j++){
 		for(int k=0 ; k < 10-(int)(to_string(this->scores[j][i]).size());k++){
@@ -325,12 +331,11 @@ void Simulator::printScores(int houseIndex){
 		}
 		printf("%.2f", totalAlgoScore/(double)this->housesAmount);
 		cout<<"|"<<endl;
-	      	cout<< line <<endl;
+	      	printLine(tableWidth);
 	    }
 	    i++;
 	    //else continue without prints
 	}
-	
 	//printAlgosEnd
 	
 }

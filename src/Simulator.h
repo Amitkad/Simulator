@@ -53,6 +53,8 @@ public:
 	 */
 	void run();
 	
+	void printLine(int width);
+	
 	/*
 	 * prints the scores with the beautifull table 
 	 */

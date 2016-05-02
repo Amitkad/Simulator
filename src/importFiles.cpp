@@ -8,7 +8,7 @@ using namespace std;
 
 //c'tor
 importFiles::importFiles(int argc, char* argv[]) :
-		algorithmPath("./"), housePath("./"), configPath("./config.ini") {
+		algorithmPath("./"), housePath("./"), configPath(".") {
 
 	checkArgValidity(argc, argv);
 	if (err)
@@ -28,10 +28,11 @@ void importFiles::checkArgValidity(int argc, char* argv[]) {
 	checkFlag(argc, argv, string("-config"), configPath);
 	if (err)
 		return;
+	configPath+="/config.ini";
 	checkFlag(argc, argv, string("-house_path"), housePath);
 	if (err)
 		return;
-	checkFlag(argc, argv, string("­-algorithm_path"), algorithmPath);
+	checkFlag(argc, argv, string("-algorithm_path"), algorithmPath);
 	if (err)
 		return;
 }
@@ -57,7 +58,7 @@ void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& path
 int importFiles::indexOf(int argc, char* argv[], string toFind) {
 	std::vector<std::string> args(argv, argv + argc);
 	for (size_t i = 1; i < args.size(); ++i) {
-		if (args[i] == toFind) {
+		if (!args[i].compare(toFind)) {
 			return i;
 		}
 	}
@@ -127,7 +128,8 @@ void importFiles::printErrors() {
 		if (!itr->second.second.empty())
 			errors+= itr->first + ": " + itr->second.second + "\n";
 	}
-	cout << errors;
+	if (errors != "\nErrors:\n")
+		cout << errors;
 }
 //-------------------------------------------------------- Nested: importConfig --------------------------------------------------------//
 
@@ -242,7 +244,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 	string name;
 	string s_maxSteps, s_rows, s_cols; //value in string
 	string err, line;
-	int maxSteps, rows, cols; //values in numbers
+	int rows, cols; //values in numbers
 	char** matrix;
 	size_t errcnt = 0;
 	for (vector<string>::const_iterator itr = dirVec.begin(); itr != dirVec.end(); ++itr) { //for each .house file:
@@ -264,7 +266,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 			houses.insert(std::make_pair(new House(NULL, 0, 0, (*itr).substr((*itr).find_last_of("/\\") + 1)), err));
 			continue;
 		}
-		maxSteps = atoi(s_maxSteps.c_str());
+		//maxSteps = atoi(s_maxSteps.c_str()); for future extensions
 		getline(fin, s_rows);
 		if (!is_number(s_rows)) {
 			err = "line number 3 in house file shall be a positive number, found: " + s_rows;
@@ -286,7 +288,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		for (int i = 0; i < rows; i++) {
 			matrix[i] = (char*) malloc(sizeof(char) * cols);
 			getline(fin, line);
-			int m = MIN(line.length(), cols);
+			int m = MIN((int)line.length(), cols);
 			line.copy(matrix[i], m, 0);
 			if (m < cols)
 				for (int k = m; k < cols; k++)
@@ -346,6 +348,7 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 		return;
 }
 importFiles::importAlgs::~importAlgs() {
+
 	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)		//release algorithm objects
 		delete itr->second.first;
 	for (auto itr = handlers.begin(); itr != handlers.end(); itr++)
