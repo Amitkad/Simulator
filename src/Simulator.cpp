@@ -53,7 +53,7 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 
 	algorithms = _algorithms;
 	
-	//todo fix matrixes for each algo .
+	// fix matrixes for each algo .
 	matrixes = (char***) malloc(sizeof(char**)*algorithmsAmount);
 	for(int j=0 ; j < algorithmsAmount ; j++){
 	  matrixes[j] = (char**) malloc(sizeof(char*) * (*house)->getRowCount());
@@ -82,7 +82,7 @@ void Simulator::run() {
   int stepsMadeAfterWinnerFound=0;
 	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
 	  winnerFound = false;
-	  int dustAmount = (*houseIt)->initDustAmount();//todo get amount.
+	  int dustAmount = (*houseIt)->initDustAmount();// get amount.
 	  int xDoc = (*houseIt)->getDockStationX();
 	  int yDoc = (*houseIt)->getDockStationY();
 	  house = (*houseIt);
@@ -203,14 +203,12 @@ void Simulator::run() {
 	    
 	  }
 	  
-	  //todo run on each algo and calculate its score . then put the score in the scores table .
+	  // run on each algo and calculate its score . then put the score in the scores table .
 	  int y=0;
 	  if(!winnerSteps){
 	    winnerSteps = simulationSteps;
 	    
 	  }
-//	  cout<<this->stepsMade[0]<<endl;
-//	  cout<<this->stepsMade[1]<<endl;
 
 	  for(map<string,pair<AbstractAlgorithm*,string>>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
 	    int position = 1;
@@ -222,15 +220,14 @@ void Simulator::run() {
 	    }
 	    if(position > 4) position = 4;
 	    scores[houseIndex][y] = calcScore(wonAlready[y],position,y,(*houseIt));
-//	      cout<<"--"<<scores[houseIndex][y]<<"--"<<endl;
 
 	    y++;
 	  }
 	  houseIndex++; 
 	}
-//	cout<<this->stepsMade[1]<<endl;
+
 	
-	//todo print scores
+	// print scores
 	
 	this->printScores(houseIndex);
 	

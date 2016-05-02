@@ -1,30 +1,30 @@
  
 
  
-#include "topDownAlgo.h"
+#include "201191897_A_.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
 
-goodAlgo::goodAlgo(){
+_201191897_A::_201191897_A(){
 	 srand(time(NULL));//for randomization matters
 	 
 }
 
-goodAlgo::~goodAlgo() {
+_201191897_A::~_201191897_A() {
 	delete sensor;
 }
 
-void goodAlgo::setSensor(const AbstractSensor& sensor) {
+void _201191897_A::setSensor(const AbstractSensor& sensor) {
 	this->sensor = &sensor;
 }
 
-void goodAlgo::setConfiguration(map<string, int> config) {
+void _201191897_A::setConfiguration(map<string, int> config) {
 	this->config = config;
 }
 
-Direction goodAlgo::step() {
+Direction _201191897_A::step() {
     int dir=-1;
     if(stepsMade.size() >= stepsLeft-1){
       dir = stepsMade.end();
@@ -53,12 +53,12 @@ Direction goodAlgo::step() {
     return dir;
 }
 
-void goodAlgo::aboutToFinish(int stepsTillFinishing) {
+void _201191897_A::aboutToFinish(int stepsTillFinishing) {
   stepsLeft = stepsTillFinishing;
 } 
 
 //return instance for .so matters
 extern "C" AbstractAlgorithm* getAbstractAlgorithmPointer()
 {
-    return new goodAlgo();
+    return new _201191897_A();
 }

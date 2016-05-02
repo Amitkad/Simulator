@@ -4,7 +4,6 @@
 
 using namespace std;
 
-
 // -------------------------------------------------- Base Class: import files --------------------------------------------------------//
 
 //c'tor
@@ -17,7 +16,7 @@ importFiles::importFiles(int argc, char* argv[]) :
 	this->fillInputFromFiles(argc, argv);
 }
 
-importFiles::~importFiles(){
+importFiles::~importFiles() {
 	delete algorithms;
 	delete houses;
 	delete config;
@@ -69,14 +68,12 @@ void importFiles::fillInputFromFiles(int argc, char* argv[]) {
 	config = new importFiles::importConfig(configPath, *this);
 	if (err)
 		return;
+	houses = new importFiles::importHouses(housePath, *this);
+		if (err)
+			return;
 	algorithms = new importFiles::importAlgs(algorithmPath, *this);
 	if (err)
 		return;
-	houses = new importFiles::importHouses(housePath, *this);
-	if (err)
-		return;
-
-
 }
 
 //class member getters
@@ -120,6 +117,18 @@ string importFiles::getAlgPath() const {
 	return algorithmPath;
 }
 
+void importFiles::printErrors() {
+	string errors = "\nErrors:\n";
+	for (auto itr = getHouses().begin(); itr != getHouses().end(); ++itr) {
+		if (!itr->second.empty())
+			errors+=itr->first->getName() + ": " + itr->second +"\n";
+	}
+	for (auto itr = getAlgorithms().begin(); itr != getAlgorithms().end(); ++itr) {
+		if (!itr->second.second.empty())
+			errors+= itr->first + ": " + itr->second.second + "\n";
+	}
+	cout << errors;
+}
 //-------------------------------------------------------- Nested: importConfig --------------------------------------------------------//
 
 static vector<string> split(const string &s, char delim) {
@@ -250,7 +259,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		//get parameters from file and check them
 		getline(fin, s_maxSteps);
 		if (!is_number(s_maxSteps)) {
-			err = "line number 2 in house file shall be a positive number, found:" + s_maxSteps;
+			err = "line number 2 in house file shall be a positive number, found: " + s_maxSteps;
 			errcnt++;
 			houses.insert(std::make_pair(new House(NULL, 0, 0, (*itr).substr((*itr).find_last_of("/\\") + 1)), err));
 			continue;
@@ -258,7 +267,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		maxSteps = atoi(s_maxSteps.c_str());
 		getline(fin, s_rows);
 		if (!is_number(s_rows)) {
-			err = "line number 3 in house file shall be a positive number, found:" + s_rows;
+			err = "line number 3 in house file shall be a positive number, found: " + s_rows;
 			errcnt++;
 			houses.insert(std::make_pair(new House(NULL, 0, 0, (*itr).substr((*itr).find_last_of("/\\") + 1)), err));
 			continue;
@@ -266,7 +275,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		rows = atoi(s_rows.c_str());
 		getline(fin, s_cols);
 		if (!is_number(s_cols)) {
-			err = "line number 4 in house file shall be a positive number, found:" + s_cols;
+			err = "line number 4 in house file shall be a positive number, found: " + s_cols;
 			errcnt++;
 			houses.insert(std::make_pair(new House(NULL, 0, 0, (*itr).substr((*itr).find_last_of("/\\") + 1)), err));
 			continue;
@@ -299,9 +308,9 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 //if all files are bad
 	if (errcnt == houses.size()) {
 		parent.setErr(true);
-		cout << "All house files in target folder" << parent.getHousePath() << "cannot be opened or are invalid:" << endl;
+		cout << "All house files in target folder " << parent.getHousePath() << " cannot be opened or are invalid:" << endl;
 		for (map<House*, string>::const_iterator itr = houses.begin(); itr != houses.end(); ++itr) {
-			cout << (*itr).first->getName() << ":" << (*itr).second << endl;
+			cout << (*itr).first->getName() << ": " << (*itr).second << endl;
 		}
 	}
 }
@@ -337,10 +346,10 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 		return;
 }
 importFiles::importAlgs::~importAlgs() {
-	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)//release algorithm objects
+	for (auto itr = algorithms.begin(); itr != algorithms.end(); itr++)		//release algorithm objects
 		delete itr->second.first;
-for (auto itr = handlers.begin(); itr != handlers.end(); itr++)
-		dlclose(*itr);// release algorithms handlers
+	for (auto itr = handlers.begin(); itr != handlers.end(); itr++)
+		dlclose(*itr);		// release algorithms handlers
 }
 
 void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
@@ -370,9 +379,9 @@ void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
 //if all files in folder are bad
 	if (errcnt == algorithms.size()) {
 		parent.setErr(true);
-		cout << "All house files in target folder" << parent.getAlgPath() << "cannot be opened or are invalid:" << endl;
+		cout << "All house files in target folder " << parent.getAlgPath() << " cannot be opened or are invalid:" << endl;
 		for (auto itr = algorithms.begin(); itr != algorithms.end(); ++itr) {
-			cout << (*itr).first << ":" << (*itr).second.second << endl;
+			cout << (*itr).first << ": " << (*itr).second.second << endl;
 		}
 		return;
 	}

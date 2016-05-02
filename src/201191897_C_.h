@@ -6,8 +6,8 @@
  *  Created on: 19 Mar 2016
  *      Author: Amit
  */
-#ifndef RANDALGORITHM_H_
-#define RANDALGORITHM_H_
+#ifndef _201191897_C_H_
+#define _201191897_C_H_
 
 #include <map>
 #include <string>
@@ -17,14 +17,14 @@
 
 using namespace std;
 
-class stayInPlaceAlgo: public AbstractAlgorithm {
+class _201191897_C: public AbstractAlgorithm {
 	const AbstractSensor* sensor;
 	map<string, int> config;
 public:
-	stayInPlaceAlgo();
-	~stayInPlaceAlgo();
-	stayInPlaceAlgo& operator=(const stayInPlaceAlgo&) = delete;
-	stayInPlaceAlgo(const stayInPlaceAlgo&) = delete;
+	_201191897_C();
+	~_201191897_C();
+	_201191897_C& operator=(const _201191897_C&) = delete;
+	_201191897_C(const _201191897_C&) = delete;
 
 	// setSensor is called once when the Algorithm is initialized
 	void setSensor(const AbstractSensor& sensor);
