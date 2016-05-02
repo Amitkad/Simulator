@@ -1,27 +1,21 @@
-CC_FLAGS = -std=c++11 -g -Wall -O2 -pedantic -pthread
-
+CC_FLAGS = -std=c++11 -g -Wall -O2 -ldl
+SO_FLAGS = -std=c++11 -shared -fPIC -o
 # may add boost libraries here
 LD_FLAGS = -lm
 
-all: simulator
+all: simulator 201191897_A_.so 201191897_B_.so 201191897_C_.so
 
-simulator:  main.o auxillary.o configParser.o  House.o topDownAlgo.o  SimpleSensor.o Simulator.o 
+simulator:  main.o importFiles.o House.o SimpleSensor.o Simulator.o 
 	g++ -o $@ $^ $(CC_FLAGS)
 
-main.o: main.cpp topDownAlgo.cpp SimpleSensor.cpp auxillary.cpp configParser.cpp House.cpp Simulator.cpp 
+main.o: main.cpp importFiles.cpp SimpleSensor.cpp  House.cpp Simulator.cpp 
 	g++ -c  $(CC_FLAGS) main.cpp
-	
-auxillary.o: auxillary.cpp auxillary.h
-	g++ -c  $(CC_FLAGS) auxillary.cpp
 
-configParser.o: configParser.cpp configParser.h
-	g++ -c  $(CC_FLAGS) configParser.cpp
+importFiles.o: importFiles.cpp importFiles.h
+	g++ -c  $(CC_FLAGS) importFiles.cpp
 
 House.o: House.cpp House.h
 	g++ -c  $(CC_FLAGS) House.cpp
-	
-topDownAlgo.o: topDownAlgo.cpp topDownAlgo.h
-	g++ -c  $(CC_FLAGS) topDownAlgo.cpp
 	
 SimpleSensor.o: SimpleSensor.cpp SimpleSensor.h
 	g++ -c   $(CC_FLAGS) SimpleSensor.cpp
@@ -29,6 +23,15 @@ SimpleSensor.o: SimpleSensor.cpp SimpleSensor.h
 Simulator.o: Simulator.cpp Simulator.h
 	g++ -c   $(CC_FLAGS) Simulator.cpp 
 
-
+201191897_A_.so: ../algSRC/201191897_A_.cpp ../algSRC/201191897_A_.h
+	g++  $(SO_FLAGS) ../algSO/201191897_A_.so ../algSRC/201191897_A_.cpp
+	
+201191897_B_.so: ../algSRC/201191897_B_.cpp ../algSRC/201191897_B_.h
+	g++  $(SO_FLAGS) ../algSO/201191897_B_.so ../algSRC/201191897_B_.cpp
+	
+201191897_C_.so: ../algSRC/201191897_C_.cpp ../algSRC/201191897_C_.h
+	g++  $(SO_FLAGS) ../algSO/201191897_C_.so ../algSRC/201191897_C_.cpp
+	
+	
 clean:
-	rm -f Simulator.o SimpleSensor.o topDownAlgo.o House.o configParser.o auxillary.o main.o simulator
+	rm -f Simulator.o SimpleSensor.o  House.o  main.o simulator ../algSO/201191897_A_.so ../algSO/201191897_B_.so ../algSO/201191897_C_.so

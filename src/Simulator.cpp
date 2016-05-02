@@ -34,7 +34,10 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 	dustAmountInHome = (int*) malloc(sizeof(int) * algorithmsAmount);
 	currentYPos = (int*) malloc(sizeof(int) * algorithmsAmount);
 	currentXPos = (int*) malloc(sizeof(int) * algorithmsAmount);
-	
+		algorithms = _algorithms;
+
+		matrixes = (char***) malloc(sizeof(char**)*algorithmsAmount);
+/*
 	vector<House*>::iterator house = houses.begin();
 	int amountOfDustInFirstHouse = (*house)->initDustAmount(); // should be first house 
 	int dockX = (*house)->getDockStationX();
@@ -51,10 +54,9 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 	
 	
 
-	algorithms = _algorithms;
 	
 	// fix matrixes for each algo .
-	matrixes = (char***) malloc(sizeof(char**)*algorithmsAmount);
+	
 	for(int j=0 ; j < algorithmsAmount ; j++){
 	  matrixes[j] = (char**) malloc(sizeof(char*) * (*house)->getRowCount());
 	  for (int i = 0; i < (*house)->getRowCount(); ++i) {
@@ -62,13 +64,33 @@ Simulator::Simulator(vector<House*> _houses, const map<string, int> _config,map<
 	    memcpy(matrixes[j][i], (*house)->getMatrix()[i], (*house)->getColCount());
 	  }
 	}
-
+*/	
+      
 
 }
 
 Simulator::~Simulator(){
-	//delete algorithm;
-	//delete house;
+	
+  
+	free(stepsMade);
+	free(batteryUsed);
+	free(dustAmountInHome); 
+	free(currentYPos); 
+	free(currentXPos);
+	free(matrixes);
+	
+	for(int i = 0 ; i < algorithmsAmount ; i++){
+	  free(scores[i]);
+	}
+	free(scores);
+	
+	for(map<string,pair<AbstractAlgorithm*,string>>::iterator algoIt = algorithms.begin(); algoIt!=algorithms.end() ; ++algoIt){
+	  delete (algoIt->second).first;
+	}
+
+	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
+	  delete (*houseIt);
+	}
 }
 
 void Simulator::run() {
@@ -99,7 +121,7 @@ void Simulator::run() {
 	    matrixes[i] = (char**) malloc(sizeof(char*) * (*houseIt)->getRowCount());
 	    for (int j = 0; j < (*houseIt)->getRowCount(); ++j) {
 	      matrixes[i][j] = (char*) malloc(sizeof(char) * (*houseIt)->getColCount());
-	      memcpy(matrixes[i][j], (*houseIt)->getMatrix()[i], (*houseIt)->getColCount());
+	      memcpy(matrixes[i][j], (*houseIt)->getMatrix()[j], (*houseIt)->getColCount());
 	    }
 	    
 	    sensors[i] = new SimpleSensor(matrixes[i], &(currentXPos[i]), &(currentYPos[i]));
@@ -166,16 +188,16 @@ void Simulator::run() {
 
 		switch (algoRecomendation) { //simulator check for algorithm return value
 		case Direction::East:
-			stepResult = this->moveRight(c);
+			stepResult = this->moveRight(c,house);
 			break;
 		case Direction::West:
-			stepResult = this->moveLeft(c);
+			stepResult = this->moveLeft(c,house);
 			break;
 		case Direction::North:
-			stepResult = this->moveUp(c);
+			stepResult = this->moveUp(c,house);
 			break;
 		case Direction::South:
-			stepResult = this->moveDown(c);
+			stepResult = this->moveDown(c,house);
 			break;
 		case Direction::Stay:
 			break;
@@ -223,17 +245,35 @@ void Simulator::run() {
 
 	    y++;
 	  }
+	  
+	  //clear sensors
+	  	  for(int t = 0 ; t < this->algorithmsAmount ; t++){
+		    delete sensors[t];
+		  }
+		  
+	//free matrixes;
+	for(int t = 0 ; t < this->algorithmsAmount ; t++){
+	  for (int r = 0; r < house->getRowCount(); ++r){
+	    	    free(matrixes[t][r]);
+	  }
+	  free(matrixes[t]);
+	}
+	free(matrixes);
+	//end free matrixes
+	  
 	  houseIndex++; 
 	}
+	
+	free(sensors);
 
 	
 	// print scores
 	
 	this->printScores(houseIndex);
 	
-	for (int i = 0; i < house->getRowCount(); ++i);
-		//free(matrix[i]);
-	//free(matrix);
+
+
+
 }
 
 void Simulator::printScores(int houseIndex){
@@ -248,7 +288,7 @@ void Simulator::printScores(int houseIndex){
 	//header
 	cout<< line <<endl;
 	
-	cout << "|            |";
+	cout << "|             |";
 	for(vector<House*>::iterator houseIt = houses.begin(); houseIt!=houses.end() ; ++houseIt){
 		houseSize=min(10,(int)((*houseIt)->getName().size()));
 		strncpy(houseName,((*houseIt)->getName()).c_str(),houseSize);
@@ -308,35 +348,38 @@ int Simulator::calcScore(bool wonalready,int position,int i,House* currentHouse)
 }
 
 //try to move up .. on success go up and return 1 otherwise do nothing and return 0
-int Simulator::moveUp(int i ) {
-	if (currentYPos[i] > 0 && matrixes[i][currentYPos[i] - 1][currentXPos[i]] != 'W') {
+int Simulator::moveUp(int i ,House* house) {
+	if (currentYPos[i] > 0 && house->getMatrix()[currentYPos[i] - 1][currentXPos[i]] != 'W' && house->getMatrix()[currentYPos[i] - 1][currentXPos[i]] != 'w') {
 		(currentYPos[i])--;
 		return 1;
 	}
 	return 0;
 }
 //try to move down .. on success go down and return 1 otherwise do nothing and return 0
-int Simulator::moveDown(int i) {
-	if (currentYPos[i] < house->getRowCount()
-			&& house->getMatrix()[currentYPos[i] + 1][currentXPos[i]] != 'W') {
+int Simulator::moveDown(int i,House* house) {
+
+
+    if (currentYPos[i] < house->getRowCount()
+			&& house->getMatrix()[currentYPos[i] + 1][currentXPos[i]] != 'W' && house->getMatrix()[currentYPos[i] + 1][currentXPos[i]] != 'w') {
 		(currentYPos[i])++;
 		return 1;
 	}
 	return 0;
 }
 //try to move left .. on success go left and return 1 otherwise do nothing and return 0
-int Simulator::moveLeft(int i) {
+int Simulator::moveLeft(int i,House* house) {
 	if (currentXPos[i] > 0
-			&& house->getMatrix()[currentYPos[i]][currentXPos[i] - 1] != 'W') {
+			&& house->getMatrix()[currentYPos[i]][currentXPos[i] - 1] != 'W' && house->getMatrix()[currentYPos[i]][currentXPos[i] - 1] != 'w') {
 		(currentXPos[i])--;
 		return 1;
 	}
 	return 0;
 }
 //try to move right .. on success go right and return 1 otherwise do nothing and return 0
-int Simulator::moveRight(int i) {
+int Simulator::moveRight(int i, House* house) {
+
 	if (currentXPos[i] < house->getColCount()
-			&& house->getMatrix()[currentYPos[i]][currentXPos[i] + 1] != 'W') {
+			&& house->getMatrix()[currentYPos[i]][currentXPos[i] + 1] != 'W' &&  house->getMatrix()[currentYPos[i]][currentXPos[i] + 1] != 'w') {
 		(currentXPos[i])++;
 		return 1;
 	}

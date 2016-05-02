@@ -24,7 +24,7 @@ void House::setWalls() {
 	for (int i = 0; i < rowCount; i++) {
 		for (int j = 0; j < colCount; j++) {
 			if (i == 0 || j == 0 || i == rowCount - 1 || j == colCount - 1)
-				matrix[i][j] = 'w';
+				matrix[i][j] = 'W';
 		}
 	}
 }

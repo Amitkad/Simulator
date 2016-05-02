@@ -70,7 +70,7 @@ public:
 	 @return
 	 tries to move up . return 1 on success 0 on error
 	 */
-	int moveUp(int i);
+	int moveUp(int i,House* house);
 	
 	
 	/*
@@ -78,21 +78,21 @@ public:
 	 @return
 	 tries to move down . return 1 on success 0 on error
 	 */	
-	int moveDown(int i);
+	int moveDown(int i,House* house);
 
 	/*
 	 try to move left
 	 @return
 	 tries to move left . return 1 on success 0 on error
 	 */
-	int moveLeft(int i);
+	int moveLeft(int i,House* house);
 
 	/*
 	 try to move right
 	 @return
 	 tries to move right . return 1 on success 0 on error
 	 */
-	int moveRight(int i);
+	int moveRight(int i,House* house);
 
 };
 
