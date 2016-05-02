@@ -8,11 +8,11 @@ using namespace std;
 
 _201191897_B::_201191897_B(){
 	 lastMove = 0;
-	 srand(time(NULL));//for randomization matters
+	 stepsLeft = 999999;
 }
 
 _201191897_B::~_201191897_B() {
-	delete sensor;
+	//delete sensor;
 }
 
 void _201191897_B::setSensor(const AbstractSensor& sensor) {
@@ -25,17 +25,21 @@ void _201191897_B::setConfiguration(map<string, int> config) {
 
 Direction _201191897_B::step() {
 	int dir;
-	
-	if(stepsLeft <= 2 && char(sensor->sense().dirtLevel) + '0' == 'D'){
+	struct SensorInformation sensed = sensor->sense();
+	if(stepsLeft <= 2 && char(sensed.dirtLevel) + '0' == 'D'){
 	  return Direction(4);//stay
 	}
 	if(lastMove == 0){
-	  if(!sensor->sense().isWall[3]){ lastMove = 3; return Direction(3); }
-	  if(!sensor->sense().isWall[2]){ lastMove = 2; return Direction(2); }
+	  if(!(sensed.isWall[3])){
+	    lastMove = 3;
+	    return Direction(3); 
+	    
+	  }
+	  if(!(sensed.isWall[2])){ lastMove = 2; return Direction(2); }
 	}
 	if(lastMove==2){
 	  //wentDown
-	  if(!sensor->sense().isWall[3]){
+	  if(!sensed.isWall[3]){
 	    	  lastMove=3;
 		  return Direction(3);
 	  }else{
@@ -46,7 +50,7 @@ Direction _201191897_B::step() {
 	}else{
 	  if(lastMove==3){
 	    //wentUp
-	    if(!sensor->sense().isWall[2]){
+	    if(!sensed.isWall[2]){
 	    	  lastMove=2;
 		  return Direction(2);
 	  }else{

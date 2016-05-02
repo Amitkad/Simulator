@@ -10,7 +10,7 @@ _201191897_C::_201191897_C(){
 }
 
 _201191897_C::~_201191897_C() {
-	delete sensor;
+	//delete sensor;
 }
 
 void _201191897_C::setSensor(const AbstractSensor& sensor) {
