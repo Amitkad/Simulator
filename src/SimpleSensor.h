@@ -32,9 +32,8 @@ public:
 	 destructor
 	 */
 	~SimpleSensor();
-	/*
-	 */
-	SimpleSensor& operator=(const SimpleSensor& sensor) = delete;
+	//no need for operator= and copy c'tor
+	SimpleSensor& operator=(const SimpleSensor&)=delete;
 	SimpleSensor(const SimpleSensor&) = delete;
 };
 

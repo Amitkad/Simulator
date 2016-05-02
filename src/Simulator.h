@@ -38,18 +38,22 @@ public:
    config - configuration of the simulator
    algorithm - an algorithm to use while running
    */
-	Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms , int _housesAmount , int _algorithmsAmount);
+	Simulator(vector<House*> _houses, const map<string, int> _config,map<string,pair<AbstractAlgorithm*,string>> _algorithms);
 	
 	/*
 	 destructor deleting algorithm and house
 	 */
 	~Simulator();
 	
+	Simulator& operator=(const Simulator&)=delete;
+	Simulator(const Simulator&) = delete;
 	/*
 	 runs the simulator using the algorithm and the config 
 	 then prints the scores
 	 */
 	void run();
+	
+	void printLine(int width);
 	
 	/*
 	 * prints the scores with the beautifull table 
@@ -68,7 +72,7 @@ public:
 	 @return
 	 tries to move up . return 1 on success 0 on error
 	 */
-	int moveUp(int i);
+	int moveUp(int i,House* house);
 	
 	
 	/*
@@ -76,21 +80,21 @@ public:
 	 @return
 	 tries to move down . return 1 on success 0 on error
 	 */	
-	int moveDown(int i);
+	int moveDown(int i,House* house);
 
 	/*
 	 try to move left
 	 @return
 	 tries to move left . return 1 on success 0 on error
 	 */
-	int moveLeft(int i);
+	int moveLeft(int i,House* house);
 
 	/*
 	 try to move right
 	 @return
 	 tries to move right . return 1 on success 0 on error
 	 */
-	int moveRight(int i);
+	int moveRight(int i,House* house);
 
 };
 

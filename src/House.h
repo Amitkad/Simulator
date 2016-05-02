@@ -12,9 +12,10 @@ class House {
     int colCount;
     int rowCount;
     int errCode=1; //code 0 - no docking station; code 1 - ok; code 2 - too many docking stations
-
-    void setWalls();// put walls around
-    void setDock();//sets the docking station (x,y) and count if put error if no docking or more than one docking station.
+    // put walls around
+    void setWalls();
+    //sets the docking station (x,y) and count if put error if no docking or more than one docking station.
+    void setDock();
 
 	public:
 	  
