@@ -155,7 +155,7 @@ class importFiles {
 	//Base class's ("importFiles") members//
 
 	bool err = false; //true iff there was an error
-	string algorithmPath, housePath, configPath; //paths of algorithms, houses, config directories
+	string algorithmPath, housePath, configPath, scoreFormulaPath,threads; //paths of algorithms, houses, config directories
 	importAlgs* algorithms; //algorithms parser
 	importHouses* houses; //houses parser
 	importConfig* config; //config.ini parser
