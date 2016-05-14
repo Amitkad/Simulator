@@ -28,28 +28,34 @@ void importFiles::checkArgValidity(int argc, char* argv[]) {
 	checkFlag(argc, argv, string("-config"), configPath);
 	if (err)
 		return;
-	configPath+="/config.ini";
+	configPath += "/config.ini";
 	checkFlag(argc, argv, string("-house_path"), housePath);
 	if (err)
 		return;
 	checkFlag(argc, argv, string("-algorithm_path"), algorithmPath);
 	if (err)
 		return;
+	checkFlag(argc, argv, string("­-score_formula"), scoreFormulaPath);
+	if (err)
+		return;
+	checkFlag(argc, argv, string("­-threads"), threads);
+	return;
 }
 void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& pathVariable) {
 	int i = indexOf(argc, argv, toCheck);
 	if (i != -1) {
 		if (i != (argc - 1)) {
-			if ((string(argv[i + 1]) != "-config") && (string(argv[i + 1]) != "-house_path") && (string(argv[i + 1]) != "-algorithm_path")) {
+			if ((string(argv[i + 1]) != "-config") && (string(argv[i + 1]) != "-house_path") && (string(argv[i + 1]) != "-algorithm_path")&& (string(argv[i + 1]) != "-score_formula")&& (string(argv[i + 1]) != "-threads")) {
+				if ((toCheck=="-threads"))
 				pathVariable = string(argv[i + 1]);
 			} else {
 				setErr(true);
-				cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+				cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 				return;
 			}
 		} else {
 			setErr(true);
-			cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+			cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 			return;
 		}
 	}
@@ -70,8 +76,8 @@ void importFiles::fillInputFromFiles(int argc, char* argv[]) {
 	if (err)
 		return;
 	houses = new importFiles::importHouses(housePath, *this);
-		if (err)
-			return;
+	if (err)
+		return;
 	algorithms = new importFiles::importAlgs(algorithmPath, *this);
 	if (err)
 		return;
@@ -122,11 +128,11 @@ void importFiles::printErrors() {
 	string errors = "\nErrors:\n";
 	for (auto itr = getHouses().begin(); itr != getHouses().end(); ++itr) {
 		if (!itr->second.empty())
-			errors+=itr->first->getName() + ": " + itr->second +"\n";
+			errors += itr->first->getName() + ": " + itr->second + "\n";
 	}
 	for (auto itr = getAlgorithms().begin(); itr != getAlgorithms().end(); ++itr) {
 		if (!itr->second.second.empty())
-			errors+= itr->first + ": " + itr->second.second + "\n";
+			errors += itr->first + ": " + itr->second.second + "\n";
 	}
 	if (errors != "\nErrors:\n")
 		cout << errors;
@@ -164,7 +170,7 @@ void importFiles::importConfig::loadFromFile(const string& iniPath) {
 	ifstream fin(iniPath.c_str());
 	if (!fin.good()) { // check iniPath existence
 		parent.setErr(true);
-		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 		return;
 	}
 	string line;
@@ -219,14 +225,14 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 	FilesListerWithSuffix housesLister = FilesListerWithSuffix(iniPath, ".house");
 //if dir is missing and no
 	if (housesLister.getErr()) {
-		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
 	parent.setHousePath(housesLister.getBasePath());
 //if there are no .house files in the directory
 	if (housesLister.getFilesList().size() == 0) {
-		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -288,7 +294,7 @@ void importFiles::importHouses::insertHousesFromFile(vector<string> dirVec) {
 		for (int i = 0; i < rows; i++) {
 			matrix[i] = (char*) malloc(sizeof(char) * cols);
 			getline(fin, line);
-			int m = MIN((int)line.length(), cols);
+			int m = MIN((int )line.length(), cols);
 			line.copy(matrix[i], m, 0);
 			if (m < cols)
 				for (int k = m; k < cols; k++)
@@ -332,14 +338,14 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 	FilesListerWithSuffix algorithmLister = FilesListerWithSuffix(iniPath, ".so");
 //if dir didnt exsit
 	if (algorithmLister.getErr()) {
-		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
 	parent.setAlgPath(algorithmLister.getBasePath());
 //if there are no .so files in the directory
 	if (algorithmLister.getFilesList().size() == 0) {
-		cout << "Usage: simulator [-config <config path>] [-house_path <house path>][-algorithm_path <algorithm path>]\n" << endl;
+		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
 		parent.setErr(true);
 		return;
 	}
