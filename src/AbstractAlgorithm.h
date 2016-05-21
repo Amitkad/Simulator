@@ -19,7 +19,7 @@ public:
     virtual void setConfiguration(map<string, int> config) = 0; 
     
     // step is called by the simulation for each time unit 
-    virtual Direction step() = 0; 
+    virtual Direction step() = 0;//TODO add direction
     
     // this method is called by the simulation either when there is a winner or 
     // when steps == MaxSteps - MaxStepsAfterWinner 

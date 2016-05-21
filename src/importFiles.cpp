@@ -8,8 +8,7 @@ using namespace std;
 
 //c'tor
 importFiles::importFiles(int argc, char* argv[]) :
-		algorithmPath("./"), housePath("./"), configPath(".") {
-
+		algorithmPath("./"), housePath("./"), configPath("."), scoreFormulaPath("."), threads("1") {
 	checkArgValidity(argc, argv);
 	if (err)
 		return;
@@ -29,13 +28,14 @@ void importFiles::checkArgValidity(int argc, char* argv[]) {
 	if (err)
 		return;
 	configPath += "/config.ini";
+	checkFlag(argc, argv, string("­-score_formula"), scoreFormulaPath);
+	if (err)
+		return;
+	scoreFormulaPath += "/score_formula.so";
 	checkFlag(argc, argv, string("-house_path"), housePath);
 	if (err)
 		return;
 	checkFlag(argc, argv, string("-algorithm_path"), algorithmPath);
-	if (err)
-		return;
-	checkFlag(argc, argv, string("­-score_formula"), scoreFormulaPath);
 	if (err)
 		return;
 	checkFlag(argc, argv, string("­-threads"), threads);
@@ -43,10 +43,13 @@ void importFiles::checkArgValidity(int argc, char* argv[]) {
 }
 void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& pathVariable) {
 	int i = indexOf(argc, argv, toCheck);
-	if (i != -1) {
-		if (i != (argc - 1)) {
-			if ((string(argv[i + 1]) != "-config") && (string(argv[i + 1]) != "-house_path") && (string(argv[i + 1]) != "-algorithm_path")&& (string(argv[i + 1]) != "-score_formula")&& (string(argv[i + 1]) != "-threads")) {
-				if ((toCheck=="-threads"))
+	if (i != -1) { // if flags was found
+		if (i != (argc - 1)) { // flag is not the last arg(it has a value)
+			if ((string(argv[i + 1]) != "-config") && (string(argv[i + 1]) != "-house_path") && (string(argv[i + 1]) != "-algorithm_path") && (string(argv[i + 1]) != "-score_formula") && (string(argv[i + 1]) != "-threads")) { // flag vlue is not a flag's name
+				if ((toCheck == "-threads"))
+					if ((!is_number(string(argv[i]))) || (string(argv[i])== "0")) { //if value of thread zero or negative //TODO check if "0" works
+						return; //dont change threads
+					}
 				pathVariable = string(argv[i + 1]);
 			} else {
 				setErr(true);
@@ -59,6 +62,9 @@ void importFiles::checkFlag(int argc, char* argv[], string toCheck, string& path
 			return;
 		}
 	}
+}
+bool importFiles::is_number(const string& s) {
+	return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) {return !std::isdigit(c);}) == s.end();
 }
 
 int importFiles::indexOf(int argc, char* argv[], string toFind) {
@@ -123,6 +129,9 @@ string importFiles::getHousePath() const {
 string importFiles::getAlgPath() const {
 	return algorithmPath;
 }
+int importFiles::getThreads() {
+	return atoi(threads.c_str());
+}
 
 void importFiles::printErrors() {
 	string errors = "\nErrors:\n";
@@ -137,6 +146,39 @@ void importFiles::printErrors() {
 	if (errors != "\nErrors:\n")
 		cout << errors;
 }
+
+
+//-------------import scoreFormula ---------------//
+
+void importFiles::loadScoreForumla() {
+	string pathOnly = scoreFormulaPath.substr(0, scoreFormulaPath.find_last_of("/\\"));
+
+	struct stat buffer;
+	if (stat(scoreFormulaPath.c_str(), &buffer) == 0) {
+		setErr(true);
+		cout << "cannot find score_formula.so file in '" << pathOnly << "'" << endl;
+		return;
+	}
+	scoreFormulaHandler = dlopen(scoreFormulaPath.c_str(), RTLD_NOW);
+	if (scoreFormulaHandler == nullptr) { //if there was an error opening .so file
+		setErr(true);
+		cout << "score_formula.so exists in '" << pathOnly << "' but cannot be opened or is not a valid .so"<<endl;
+		return;
+	}
+	calc_score_func = (scoreFormulaMaker*) dlsym(scoreFormulaHandler, "calc_score");
+	if (calc_score_func == nullptr) {
+		setErr(true);
+		cout << "score_formula.so is a valid .so but it does not have a valid score formula" << endl;
+		return;
+	}
+}
+
+int importFiles::calc_score(const map<string,int>& score_params) {
+	return calc_score_func(score_params);
+}
+
+
+
 //-------------------------------------------------------- Nested: importConfig --------------------------------------------------------//
 
 static vector<string> split(const string &s, char delim) {
@@ -155,28 +197,44 @@ static string trim(string& str) {
 	return str;
 }
 
-void importFiles::importConfig::processLine(const string& line) {
-
+bool importFiles::importConfig::processLine(const string& line, string& badParameters) {
 	vector<string> tokens = split(line, '=');
-	if (tokens.size() != 2) {
-		return;
-	}
 
+	if (tokens.size() != 2) { // if to many '=' signs
+		return true;
+	}
+	if (!tokens[1].empty() && (tokens[1][tokens[1].length()-1] == '\r')||(tokens[1][tokens[1].length()-1] == '\n')) {//cut the newline
+			tokens[1].erase(tokens[1].length()-1);
+		}
+	if (!parent.is_number(trim(tokens[1]))) { //if bad value
+		badParameters += tokens[0] + ",";
+		return false;
+	}
 	this->parameters[trim(tokens[0])] = atoi(tokens[1].c_str()); //put parsed strings in "parametrs"
+	return true;
 }
 
 void importFiles::importConfig::loadFromFile(const string& iniPath) {
+	int errCnt = 0;
+	string badParameters = string("");
 	this->parameters.clear();
 	ifstream fin(iniPath.c_str());
 	if (!fin.good()) { // check iniPath existence
 		parent.setErr(true);
 		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
+		cout << "cannot find config.ini file in '" << iniPath.substr(0, iniPath.find_last_of("/\\")) << "'" << endl;
 		return;
 	}
 	string line;
 	while (getline(fin, line)) //fill "parameters" with the the parameters and values
 	{
-		this->processLine(line);
+		if (!this->processLine(line, badParameters)) { //if value of parameter is not good
+			errCnt++;
+		}
+	}
+	if (errCnt > 0) {
+		parent.setErr(true);
+		cout << "config.ini having bad values for " << errCnt << " parameter(s): " << badParameters.substr(0, badParameters.find_last_of(",")) << endl;
 	}
 }
 
@@ -226,6 +284,7 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 //if dir is missing and no
 	if (housesLister.getErr()) {
 		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
+		cout << "cannot find house files in '" << iniPath << "'" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -233,6 +292,7 @@ importFiles::importHouses::importHouses(const string& iniPath, importFiles& _par
 //if there are no .house files in the directory
 	if (housesLister.getFilesList().size() == 0) {
 		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
+		cout << "cannot find house files in '" << iniPath << "'" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -339,6 +399,7 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 //if dir didnt exsit
 	if (algorithmLister.getErr()) {
 		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
+		cout << "cannot find algorithm files in '" << iniPath << "'" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -346,6 +407,7 @@ importFiles::importAlgs::importAlgs(const string& iniPath, importFiles& _parent)
 //if there are no .so files in the directory
 	if (algorithmLister.getFilesList().size() == 0) {
 		cout << "Usage: simulator [-­config <config path>] [-­house_path <house path>] [-­algorithm_path <algorithm path>] [-­score_formula <score .so path>] [-­threads <num threads>]\n" << endl;
+		cout << "cannot find algorithm files in '" << iniPath << "'" << endl;
 		parent.setErr(true);
 		return;
 	}
@@ -388,7 +450,7 @@ void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
 //if all files in folder are bad
 	if (errcnt == algorithms.size()) {
 		parent.setErr(true);
-		cout << "All house files in target folder " << parent.getAlgPath() << " cannot be opened or are invalid:" << endl;
+		cout << "All algorithm files in target folder " << parent.getAlgPath() << " cannot be opened or are invalid:" << endl;
 		for (auto itr = algorithms.begin(); itr != algorithms.end(); ++itr) {
 			cout << (*itr).first << ": " << (*itr).second.second << endl;
 		}
@@ -399,6 +461,8 @@ void importFiles::importAlgs::insertAlgsFromFile(vector<string> dirVec) {
 map<string, pair<AbstractAlgorithm*, string>> & importFiles::importAlgs::getAlgorithms() {
 	return algorithms;
 }
+
+
 
 //-------------------------------------------------------- Nested: FileLister --------------------------------------------------------//
 string importFiles::FilesLister::concatenateAbsolutePath(const string& dirPath, const string& fileName) {
@@ -479,4 +543,8 @@ void importFiles::FilesListerWithSuffix::filterFiles() {
 string importFiles::FilesListerWithSuffix::getBasePath() const {
 	return basePath_;
 }
+
+
+
+
 

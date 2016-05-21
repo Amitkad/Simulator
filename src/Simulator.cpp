@@ -342,13 +342,10 @@ void Simulator::printScores(int houseIndex){
 
 int Simulator::calcScore(bool wonalready,int position,int i,House* currentHouse) {
 	int score = 2000;
-	score -= ((position - 1) * 50); /*we assume the algorithm position is 1 because there is one algorithm in ex1 */
+	score -= ((position - 1) * 50);
 	score += (this->winnerSteps - this->stepsMade[i]) * (10);
-//	cout<<"--"<<score<<"--"<<endl;
 	score -= this->dustAmountInHome[i] * 3;
-//	cout<<"--"<<score<<"--"<<endl;
 	score +=(currentXPos[i] == currentHouse->getDockStationX())&& (currentYPos[i] == currentHouse->getDockStationY()) ? 50 : -200;
-//	cout<<"--"<<score<<"--"<<endl;
 	return max(0, score);
 }
 

@@ -16,6 +16,9 @@
 #include <algorithm>
 #include <errno.h>
 #include <dlfcn.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "AbstractAlgorithm.h"
 #include "House.h"
 
@@ -42,7 +45,7 @@ class importFiles {
 		 * @param
 		 * line - a text input
 		 */
-		void processLine(const string& line);
+		bool processLine(const string& line,string& badParameters);
 
 		/*load the file iniPath or default config.ini if iniPath doesn't exists
 		 * @param
@@ -159,6 +162,9 @@ class importFiles {
 	importAlgs* algorithms; //algorithms parser
 	importHouses* houses; //houses parser
 	importConfig* config; //config.ini parser
+	void* scoreFormulaHandler;
+	typedef int scoreFormulaMaker(const map<string,int>& score_params);
+	scoreFormulaMaker* calc_score_func;
 
 	/*check flags validity and update directory paths accordingly. changes err to be true if something is wrong in cmd line or directories
 	 * @params
@@ -181,6 +187,8 @@ public:
 	importFiles(const importFiles&) = delete;
 
 	void printErrors();
+	bool is_number(const string& s);
+	void loadScoreForumla();
 
 	//class member getters
 	map<string, pair<AbstractAlgorithm*, string>>& getAlgorithms();
@@ -190,6 +198,8 @@ public:
 	string getAlgPath() const;
 	string getHousePath() const;
 	bool getErr();
+	int getThreads();
+	int calc_score(const map<string,int>& score_params);
 
 	// setters
 	void setErr(const bool err);
